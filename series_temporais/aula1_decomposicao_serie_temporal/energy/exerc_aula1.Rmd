@@ -1,0 +1,144 @@
+---
+title: "Decomposição de Série Temporal"
+author: "R Ballini"
+date: "07/03/2023"
+output:
+  word_document:
+    toc: yes
+  html_document:
+    toc: yes
+    
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# exercicio - consumo de energia mensal (1979-2023) 
+
+```{r}
+library(readxl)
+
+dados= read_excel('energy_consumption.xlsx')
+View(dados)
+```
+
+```{r}
+
+energy = ts(dados[,4], start=c(1979,1), freq=12)
+plot(energy,ylab='Energia',xlab='Meses')
+
+lenergy=ts(log(dados[,4]), start=c(1979,1), freq=12)
+plot(lenergy,ylab='log(energy)',xlab='Anos')
+
+```
+
+## Decomposição da Série Temporal
+```{r}
+t=ts(seq(1:length(lenergy)),start=c(1979,1), freq=12)
+
+library(gets)
+
+d=ts(periodicdummies(lenergy),start=c(1979,1), freq=12)
+View(d)
+
+modelo = lm(lenergy ~ t +d[,1:3])
+summary(modelo)
+
+b=modelo$coefficients
+b
+
+tendencia=ts(b[1] + b[2]*t,start=c(1979,1), freq=12)
+View(tendencia)
+sazonal = ts(b[3]*d[,1] + b[4]*d[,2] + b[5]*d[,3],start=c(1979,1),freq=12)
+View(sazonal)
+res=ts(modelo$residuals,start=c(1979,1),freq=12)
+View(res)
+
+par(mfrow=c(2,2))
+plot(lenergy, ylab='log(energy)')
+plot(tendencia)
+plot(sazonal)
+plot(res)
+
+#Série Dessazonalizada
+par(mfrow=c(1,1))
+lenergy.sa=lenergy - sazonal
+plot(exp(lenergy.sa))
+```
+
+# Decomposição Por Médias Móveis
+
+```{r}
+#Modelo Multiplicativo
+decomp.mm= decompose(energy,type='multiplicative')
+plot(decomp.mm)
+
+sazonal.mm=decomp.mm$seasonal
+View(sazonal.mm)
+
+tendencia.mm=decomp.mm$trend
+View(tendencia.mm)
+
+residuos.mm=decomp.mm$random
+View(residuos.mm)
+
+indice.saz=decomp.mm$figure
+indice.saz
+
+dessaz.energy=ts(energy/sazonal.mm,start=c(1979,1),freq=12)
+plot(dessaz.energy, main='Log(energy) dessazonalizado')
+
+
+#Modelo Aditivo
+aditivo.mm= decompose(energy,type='additive')
+plot(aditivo.mm)
+
+Saz.aditivo=aditivo.mm$seasonal
+View(Saz.aditivo)
+
+tendencia.aditivo=aditivo.mm$trend
+View(tendencia.aditivo)
+
+residuos.aditivo=aditivo.mm$random
+View(residuos.aditivo)
+
+aditivo.saz=aditivo.mm$figure
+aditivo.saz
+
+energy.aditivo=ts(energy - Saz.aditivo,start=c(1979,1),freq=12)
+plot(pib.aditivo, main='energy dessazonalizada')
+
+```
+# Modelo de suavização exponencial simples
+```{r}
+ajuste<-HoltWinters(energy,beta=FALSE, gamma=FALSE)
+ajuste
+fitted(ajuste)
+par(mfrow=c(1,1))
+plot(ajuste)
+```
+
+#Modelo de suavização exponencial de Holt
+```{r}
+
+ajuste_holt=HoltWinters(energy, gamma=FALSE)
+ajuste_holt
+fitted(ajuste_holt)
+
+plot.ts(energy,ylab='Valores Observados/Ajustados',xlab='Tempo',main='')
+lines(fitted(ajuste_holt)[,1],lwd=1,col='red')
+```
+
+#Modelo de suavização exponencial de Holt-Winters (additive ou multiplicative)
+```{r}
+
+ajuste_hw=HoltWinters(energy,seasonal = 'multiplicative')
+ajuste_hw
+fitted(ajuste_hw)
+
+plot(energy,ylim=c(min(energy),max(energy)),ylab='Valores Observados/Ajustados',xlab='Tempo',main='')
+lines(fitted(ajuste_hw)[,1],lwd=1,col='red')
+
+
+```

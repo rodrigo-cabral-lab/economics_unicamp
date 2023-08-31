@@ -1,0 +1,132 @@
+---
+title: "atividade1"
+author: "Rodrigo Vidal Cabral"
+date: "19/03/2023"
+output: pdf_document
+  word_document:
+    toc: yes
+  html_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+a) Obtenha uma série temporal com periodicidade mensal ou trimestral;
+
+## Escolha da série temporal
+A serie temporal escolhida é uma série de frequência mensal referente ao consumo de energia elétrica (GWh) no setor industrial brasileiro no período de Jan/1979 a Jan/2023. 
+O artigo "A time Series Sustainability Assessment of a Partial Energy Portfolio Transition" https://doi.org/10.3390/en14010141 serviu de inspiração para aplicar as técnicas de séries temporais para explorar o cenário de transição energética industrial brasileiro. 
+
+```{r}
+library(readxl)
+
+dados= read_excel('energia_industrial.xlsx')
+View(dados)
+```
+
+```{r}
+#lendo arquivos e declarando variaveis
+ind = ts(dados[,2], start=c(1979,1), freq=12)
+plot(ind,ylab='Consumo de energia industrial (GWh)',xlab='Meses')
+
+lind=ts(log(dados[,2]), start=c(1979,1), freq=12)
+plot(lind,ylab='log(Consumo de energia industrial (GWh))',xlab='Meses')
+
+```
+
+b) Obtenha a série dessazonalizada usando a técnica de variáveis dummies. Faça os gráficos da série original, da série sazonal e da série dessazonalizada.
+
+## Decomposição da Série Temporal
+```{r}
+t=ts(seq(1:length(lind)),start=c(1979,1), freq=12)
+
+#Construir as binárias
+#install.packages('gets')
+library(gets)
+
+d=ts(periodicdummies(lind),start=c(1979,1), freq=12)
+View(d)
+
+modelo = lm(lind ~ t +d[,1:11])
+summary(modelo)
+
+b=modelo$coefficients
+b
+
+tendencia=ts(b[1] + b[2]*t,start=c(1979,1), freq=12)
+View(tendencia)
+sazonal = ts(b[3]*d[,1] + b[4]*d[,2] + b[5]*d[,3] + b[6]*d[,4] + b[7]*d[,5] + b[8]*d[,6] + b[9]*d[,7] + b[10]*d[,8] + b[11]*d[,9] + b[12]*d[,10] + b[13]*d[,11],start=c(1979,1),freq=12)
+View(sazonal)
+res=ts(modelo$residuals,start=c(1979,1),freq=12)
+View(res)
+
+plot(ind,ylab='Consumo de energia industrial (GWh)',xlab='Meses')
+
+par(mfrow=c(2,2))
+plot(lind, ylab='log(Consumo de energia industrial (Gwh))')
+plot(tendencia)
+plot(sazonal)
+plot(res)
+```
+
+
+#Série Dessazonalizada
+```{r}
+par(mfrow=c(1,1))
+lind.sa=lind - sazonal
+plot(exp(lind.sa), main='Consumo de energia industrial - dessazonalizado por variáveis dummies')
+```
+
+c) Obtenha a série dessazonalizada a partir das médias móveis. Faça os gráficos da série original, da série sazonal e da série dessazonalizada.
+
+# Decomposição Por Médias Móveis
+
+```{r}
+#Modelo Multiplicativo
+decomp.mm= decompose(ind,type='multiplicative')
+plot(decomp.mm)
+
+sazonal.mm=decomp.mm$seasonal
+View(sazonal.mm)
+
+tendencia.mm=decomp.mm$trend
+View(tendencia.mm)
+
+residuos.mm=decomp.mm$random
+View(residuos.mm)
+
+indice.saz=decomp.mm$figure
+indice.saz
+
+dessaz.ind=ts(ind/sazonal.mm,start=c(1979,1),freq=12)
+
+plot(ind,ylab='Consumo de energia industrial (GWh)',xlab='Meses')
+
+plot(dessaz.ind, main='Consumo de energia industrial - dessazonalizado por médias móveis')
+```
+
+
+d) aplique o filtro HP para obter a série suavizada. Apresente os gráficos das séries suavizada e de ciclo.
+
+#Aplicação Filtro HP
+```{r}
+#variavel ind
+
+#install.packages('mFilter')
+library(mFilter)
+
+hp <- hpfilter(ind, freq = 14400) #coeficiente para freq mensal 
+
+par(mfrow=c(2,1),cex=.8)
+plot(hp$x, main="Hodrick-Prescott filter: Trend",
+     col=1, ylab="")
+lines(hp$trend,col=2)
+
+plot(hp$cycle,
+     main="Hodrick-Prescott filter: Cycle",
+     col=2, ylab="", ylim=range(hp$cycle,na.rm=TRUE))
+```
+
+Nota-se no primeiro gráfico a suavização por filtro HP com uma melhor vizualização da tendência de médio e longo prazo. Já no segundo gráfico nota-se os ciclos de curto prazo. Assim, observa-se a compatibilidade com o objetivo da ferramenta utilizada para retirar tendências de longo prazo. 

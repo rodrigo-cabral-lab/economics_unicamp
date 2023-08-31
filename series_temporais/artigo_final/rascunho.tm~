@@ -1,0 +1,206 @@
+<TeXmacs|2.1>
+
+<style|<tuple|generic|portuguese>>
+
+<\body>
+  De acordo com o pensamento Keynesiano, o estado precisa intervir no
+  investimento para impulsionar o densenvolvimento econômico\ 
+
+  A capacidade de utilização da indústria pode depender da demanda agregada
+  ou novos investiementos em projetos de novas tecnologias, seja dentro de um
+  planejamento de longo prazo de catchup tecnológico, reflexo de um
+  desenvolvimento de P&D ativo.
+
+  ---------------------------------------------------------------------------<hrule>
+
+  A economia pós-keynesiana é uma escola de pensamento econômico que se
+  baseia nas ideias de John Maynard Keynes, enfatizando o papel da incerteza,
+  da demanda efetiva e dos mercados financeiros na influência dos resultados
+  econômicos. Quando se trata de analisar o investimento da empresa para
+  exportação a partir de uma perspectiva pós-keynesiana, vários fatores-chave
+  entram em jogo. \ Entre eles a\ 
+
+  <\enumerate>
+    incerteza e expectativas, a análise pós-keynesiana enfatiza que o futuro
+    é incerto e as decisões de investimento das empresas são fortemente
+    influenciadas por suas expectativas sobre a demanda futura e
+    lucratividade nos mercados de exportação. As expectativas desempenham um
+    papel crucial para determinar se as empresas investirão em novas
+    capacidades ou expandirão sua produção voltada para a exportação. Já a
+    por parte da demanda efetiva e condições de mercado as decisões de
+    investimento são influenciadas pelo nível de demanda efetiva na economia,
+    que em síntese é a combinação dos gastos dos agentes econômicos e das
+    firmas. Se a procura for insuficiente, as empresas podem hesitar em
+    investir na produção orientada para a exportação, mesmo que tenham
+    capacidade para o fazer, influênciando utilização da capacidade
+    produtiva. Em termos da taxa de câmbio, a volatilidade é um fator crítico
+    para as empresas envolvidas em atividades de exportação. Os
+    pós-keynesianos destacam o impacto das flutuações da taxa de câmbio na
+    competitividade e lucratividade das firmas exportadoras. Mudanças rápidas
+    e imprevisíveis nas taxas de câmbio podem gerar incerteza para as
+    empresas e afetar suas decisões de investimento. Outra variável crucial é
+    a disponibilidade de crédito e restrições financeiras, dado o papel do
+    setor financeiro em influenciar as decisões de investimento. Se o crédito
+    não estiver prontamente disponível ou vier com altas taxas de juros, as
+    empresas podem enfrentar restrições financeiras que podem prejudicar seus
+    investimentos voltados para a exportação. Logo, são fundamentais as
+    política e apoio do estado na promoção do investimento orientado, através
+    de subsídios setorias centralizado por uma política nacional industrial,
+    como o desembolso de crédito do BNDES para setores estratégicos. Já as
+    políticas fiscais e monetárias podem influenciar a demanda geral dada a
+    grande influência em desacelerar a econômica em casos de aperto
+    monetário. Consequentemente sõa geradas incertezas dada a queda na
+    demanada agregada da economia, gerando dificuldades de produção de bens
+    de capitais nacionais e impactando diretamente as firmas exportadoras.
+    Fatores institucionais e relações internacionais também são pontos
+    levantados pela análise pós-keynesiana, pois reconhecem que a
+    configuração institucional de uma economia pode afetar as decisões de
+    investimento. Fatores como regulamentações do mercado de trabalho, poder
+    de negociação sindical e políticas industriais podem influenciar a
+    disposição das firmas de investir em produção voltada para a exportação.
+    Já do lado das relações comerciais internacionais, as condições
+    econômicas globais inerentes as incertezas, como mudanças na demanda
+    global, políticas protecionistas e acordos comerciais podem afetar a
+    atratividade da exportação para as firmas.
+  </enumerate>
+
+  No geral, uma análise pós-keynesiana do investimento firme para exportação
+  enfatiza a importância das expectativas, incerteza, demanda efetiva,
+  fatores financeiros e políticas governamentais na formação de decisões de
+  investimento. Ele reconhece a complexidade e a interdependência de vários
+  fatores econômicos na determinação das escolhas das firmas em relação aos
+  mercados de exportação.
+
+  ------------------------------------------------------------------------------------------<hrule>
+
+  \;
+
+  \;
+
+  \;
+
+  O Banco Nacional de Desenvolvimento Econômico (BNDES) possui um papel
+  fundamental na política industrial brasileira, dado que a restrição ao
+  crédito para projetos de longo prazo é uma das falhas de mercado do setor
+  privado nacional (Ottaviano, ). O BNDES atua com o objetivo de aumentar a
+  competitividade das firmas nacionais, tanto para suprir a demanda agregada
+  interna como para auxiliar na internacionalização das firmas na cadeia
+  global de valor. A inserção internacional das firmas está fundamentada na
+  busca por recursos, mercados, ganhos de eficiência ou ativos estratégicos.
+  Para reduzir a dependência externa de investimentos, a política estratégica
+  do BNDES torna-se ainda mais fundamental (Almeida, 2003). A balança
+  comercial, diferença entre exportação e importação, é uma boa proxy para
+  analisar a polítca industrial de internacionalização das firmas nacionais.
+  Para suprir as demandas de exportação na indústria de bens de capital as
+  importações acompanham a dinâmica das indústrias nacionais. \ \ \ \ 
+
+  Colocar JEC
+
+  Análise empírica
+
+  Para investigar a relação empírica entre as variáveis relacionadas a
+  exportações da indpustria de transformação brasielira \ será estimado o
+  modelo econométrico de Vetores Autorregressivos (VAR), assumindo todas as
+  variáveis como endógenas, onde será analisado as relações lineares a partir
+  dos dados defasados de cada série temporal. Conforme apresentado por Bueno
+  (2011), um modelo VAR de ordem p, sendo p o número de defasagens do modelo,
+  com n variáveis endógenas, Xt, que estão correlacionadas entre si através
+  de uma matriz A, conforme a equação 1.
+
+  \;
+
+  <tabular|<tformat|<twith|table-hmode|min>|<twith|table-width|1par>|<cwith|1|-1|1|-1|cell-hyphen|t>|<table|<row|<cell|\<#1D434\>\<#1D44B\>!
+  = \<#1D435\>! + >|<cell|\<#1D435\>!\<#1D44B\>!!! + \<#1D435\>!!>>>>>!
+  !!!<next-line>
+
+  \;
+
+  Sendo A a matriz nxn que define as restrições contemporâneas entre as
+  variáveis que compõe o vetor Xt, nx1. B0 é um vetor de constantes nx1, Bt
+  são matrizes nxn, B é uma matriz diagonal nxn de desvios-padrão e Et é um
+  vetor nx1 de choques aleatórios não correlacionados.\ 
+
+  Para aplicação do modelo VAR torna-se necessário aplicar testes de raiz
+  unitária para averiguar a estacionariedade de cada série, algo fundamental
+  para uma inferência estatística fidedigna.
+
+  Para a verificação do modelo, são fundamentais os seguintes passos:
+
+  Para estabilidade do modelo é torna-se necessário assegurar a condição da
+  seguinte equação:\ 
+
+  I-Az=0
+
+  , sendo I uma matriz identidade nxn, A e z o vetor nx1 representando as
+  variáveis do modelo. Logo, os autovalores da matriz A devem ser menor do
+  que 1 para assegurar a estabilidade do modelo VAR. \ \ \ \ 
+
+  A correlograma, ou seja, a correlação cruzada dos resíduos devem estar
+  dentro de um intervalo de confiança de 95%.
+
+  \ Outro ponto importante é garantir que as autocorrelações multivariadas
+  são nulas, ou seja, que as correlações cruzadas não são significativas,
+  para um dado níivel de significância. Para isso foi aplicado o teste de
+  Portmanteau.\ 
+
+  \ E por fim, tem-se o teste de normalidade baseado na assimetria e curtose
+  dos resíduos padronizados representado pelo teste de Jarque-Bera
+  Multivariado. \ \ 
+
+  \ Existem algumas formas mais claras de interpretar a estimação entre a
+  dinâmica das variáveis no modelo VAR. Neste trabalho serão ultilizadas a
+  função impulso resposta, causalidade de Granger e decomposição de
+  variância. \ \ 
+
+  \ 
+
+  Base de dados
+
+  Com o obejtivo de estimar a influência das variáveis macroeconômicas na
+  produção e exportação da indústria de transformação, serão utilizadas como
+  variáveis principais do modelo a exportação corrente da indústria de
+  transformação (EXIT), índice de produção da indústria de transformação
+  (IPIT) e capacidade de utilização da indústria de transformação (CUIT). As
+  variáveis de incertezas do modelo serão representadas pelo índice VIX (CBOE
+  Volatility Index da Chicago Board Options Exchange) abordando o risco
+  externo, e pelo índice EMBI (JPMorgan Emerging Market Bond Index - Brasil)
+  responsável pelo risco nacional brasileiro. Já a taxa de câmbio (TXC) será
+  utilizada para mensurar a causa de inflação de oferta sobre os custos de
+  produção. A política monetária será incorporada ao modelo através da taxa
+  selic acumulada (TSA). O valor corrente de importação da indústria de
+  transformação (IMIT) será adiciona como proxy de demanda de bens de
+  capitais por parte das firmas exportadoras. Por fim, será adiciona a
+  variável de desembolso de crédito corrente do BNDES (DCB).Todas as séries
+  possuem frequência mensal com período de Jan-2002 à Mar-2023.
+
+  \;
+
+  Análise dos resultados\ 
+
+  Foram realizados os testes de raiz unitária para análise de
+  estacionariedade de cada variável. Foram utilizados os testes Dickey-Fuller
+  Aumentado (ADF) e Kwiatkowski, Phillips, Shimidt e Shin (KPSS). Para os
+  testes ADF, a hipótese nula é de que a série possui raiz unitária (série
+  não estacionária), enquanto que para o teste KPSS, a hipótese nula é de que
+  a série não possui raiz unitária (série estacionária).<next-line>Para
+  seleção do número de defasagens em cada teste foi utizado o critério de
+  informação AIC, e o intervalo de significância igual a 5%.\ 
+
+  COLOCAR TABELA
+
+  \;
+
+  . \ \ 
+
+  \;
+
+  \;
+
+  \;
+</body>
+
+<\initial>
+  <\collection>
+    <associate|page-medium|paper>
+  </collection>
+</initial>

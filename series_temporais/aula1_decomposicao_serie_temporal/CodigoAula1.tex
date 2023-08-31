@@ -1,0 +1,804 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Decomposição de Série Temporal},
+  pdfauthor={R Ballini},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifluatex
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\title{Decomposição de Série Temporal}
+\author{R Ballini}
+\date{07/03/2023}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\hypertarget{exemplo---pib-trimestral-1995100---dados-observados---produto-interno-bruto-a-preuxe7os-de-mercado}{%
+\section{Exemplo - PIB trimestral (1995=100) - Dados observados -
+Produto Interno Bruto a preços de
+mercado}\label{exemplo---pib-trimestral-1995100---dados-observados---produto-interno-bruto-a-preuxe7os-de-mercado}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(readxl)}
+
+\NormalTok{dados}\OtherTok{=} \FunctionTok{read\_excel}\NormalTok{(}\StringTok{\textquotesingle{}PIB\_Agropecuaria.xlsx\textquotesingle{}}\NormalTok{)}
+\FunctionTok{View}\NormalTok{(dados)}
+
+\NormalTok{pib }\OtherTok{=} \FunctionTok{ts}\NormalTok{(dados[,}\DecValTok{2}\NormalTok{], }\AttributeTok{start=}\FunctionTok{c}\NormalTok{(}\DecValTok{1996}\NormalTok{,}\DecValTok{1}\NormalTok{), }\AttributeTok{freq=}\DecValTok{4}\NormalTok{)}
+\FunctionTok{plot}\NormalTok{(pib,}\AttributeTok{ylab=}\StringTok{\textquotesingle{}PIB\textquotesingle{}}\NormalTok{,}\AttributeTok{xlab=}\StringTok{\textquotesingle{}Anos\textquotesingle{}}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CodigoAula1_files/figure-latex/unnamed-chunk-1-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lpib}\OtherTok{=}\FunctionTok{ts}\NormalTok{(}\FunctionTok{log}\NormalTok{(dados[,}\DecValTok{2}\NormalTok{]), }\AttributeTok{start=}\FunctionTok{c}\NormalTok{(}\DecValTok{1996}\NormalTok{,}\DecValTok{1}\NormalTok{), }\AttributeTok{freq=}\DecValTok{4}\NormalTok{)}
+\FunctionTok{plot}\NormalTok{(lpib,}\AttributeTok{ylab=}\StringTok{\textquotesingle{}log(PIB)\textquotesingle{}}\NormalTok{,}\AttributeTok{xlab=}\StringTok{\textquotesingle{}Anos\textquotesingle{}}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CodigoAula1_files/figure-latex/unnamed-chunk-1-2.pdf}
+
+\hypertarget{decomposiuxe7uxe3o-da-suxe9rie-temporal}{%
+\subsection{Decomposição da Série
+Temporal}\label{decomposiuxe7uxe3o-da-suxe9rie-temporal}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{t}\OtherTok{=}\FunctionTok{ts}\NormalTok{(}\FunctionTok{seq}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(lpib)),}\AttributeTok{start=}\FunctionTok{c}\NormalTok{(}\DecValTok{1996}\NormalTok{,}\DecValTok{1}\NormalTok{), }\AttributeTok{freq=}\DecValTok{4}\NormalTok{)}
+
+\CommentTok{\#Construir as binárias}
+\CommentTok{\#install.packages(\textquotesingle{}gets\textquotesingle{})}
+\FunctionTok{library}\NormalTok{(gets)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Carregando pacotes exigidos: zoo
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'zoo'
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:base':
+## 
+##     as.Date, as.Date.numeric
+\end{verbatim}
+
+\begin{verbatim}
+## Carregando pacotes exigidos: parallel
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{d}\OtherTok{=}\FunctionTok{ts}\NormalTok{(}\FunctionTok{periodicdummies}\NormalTok{(lpib),}\AttributeTok{start=}\FunctionTok{c}\NormalTok{(}\DecValTok{1996}\NormalTok{,}\DecValTok{1}\NormalTok{), }\AttributeTok{freq=}\DecValTok{4}\NormalTok{)}
+\FunctionTok{View}\NormalTok{(d)}
+
+\NormalTok{modelo }\OtherTok{=} \FunctionTok{lm}\NormalTok{(lpib }\SpecialCharTok{\textasciitilde{}}\NormalTok{ t }\SpecialCharTok{+}\NormalTok{d[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{3}\NormalTok{])}
+\FunctionTok{summary}\NormalTok{(modelo)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = lpib ~ t + d[, 1:3])
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.30336 -0.09013  0.00021  0.06874  0.63243 
+## 
+## Coefficients:
+##               Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)  8.8483307  0.0384747  229.98  < 2e-16 ***
+## t            0.0247937  0.0004592   53.99  < 2e-16 ***
+## d[, 1:3]dum1 0.5209461  0.0404929   12.87  < 2e-16 ***
+## d[, 1:3]dum2 0.4575883  0.0404799   11.30  < 2e-16 ***
+## d[, 1:3]dum3 0.3031552  0.0404721    7.49 2.44e-11 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.1487 on 103 degrees of freedom
+## Multiple R-squared:  0.9675, Adjusted R-squared:  0.9662 
+## F-statistic: 766.1 on 4 and 103 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{b}\OtherTok{=}\NormalTok{modelo}\SpecialCharTok{$}\NormalTok{coefficients}
+\NormalTok{b}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  (Intercept)            t d[, 1:3]dum1 d[, 1:3]dum2 d[, 1:3]dum3 
+##   8.84833071   0.02479372   0.52094611   0.45758825   0.30315522
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tendencia}\OtherTok{=}\FunctionTok{ts}\NormalTok{(b[}\DecValTok{1}\NormalTok{] }\SpecialCharTok{+}\NormalTok{ b[}\DecValTok{2}\NormalTok{]}\SpecialCharTok{*}\NormalTok{t,}\AttributeTok{start=}\FunctionTok{c}\NormalTok{(}\DecValTok{1996}\NormalTok{,}\DecValTok{1}\NormalTok{), }\AttributeTok{freq=}\DecValTok{4}\NormalTok{)}
+\FunctionTok{View}\NormalTok{(tendencia)}
+\NormalTok{sazonal }\OtherTok{=} \FunctionTok{ts}\NormalTok{(b[}\DecValTok{3}\NormalTok{]}\SpecialCharTok{*}\NormalTok{d[,}\DecValTok{1}\NormalTok{] }\SpecialCharTok{+}\NormalTok{ b[}\DecValTok{4}\NormalTok{]}\SpecialCharTok{*}\NormalTok{d[,}\DecValTok{2}\NormalTok{] }\SpecialCharTok{+}\NormalTok{ b[}\DecValTok{5}\NormalTok{]}\SpecialCharTok{*}\NormalTok{d[,}\DecValTok{3}\NormalTok{],}\AttributeTok{start=}\FunctionTok{c}\NormalTok{(}\DecValTok{1996}\NormalTok{,}\DecValTok{1}\NormalTok{),}\AttributeTok{freq=}\DecValTok{4}\NormalTok{)}
+\FunctionTok{View}\NormalTok{(sazonal)}
+\NormalTok{res}\OtherTok{=}\FunctionTok{ts}\NormalTok{(modelo}\SpecialCharTok{$}\NormalTok{residuals,}\AttributeTok{start=}\FunctionTok{c}\NormalTok{(}\DecValTok{1996}\NormalTok{,}\DecValTok{1}\NormalTok{),}\AttributeTok{freq=}\DecValTok{4}\NormalTok{)}
+\FunctionTok{View}\NormalTok{(res)}
+
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow=}\FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{))}
+\FunctionTok{plot}\NormalTok{(lpib, }\AttributeTok{ylab=}\StringTok{\textquotesingle{}log(PIB)\textquotesingle{}}\NormalTok{)}
+\FunctionTok{plot}\NormalTok{(tendencia)}
+\FunctionTok{plot}\NormalTok{(sazonal)}
+\FunctionTok{plot}\NormalTok{(res)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CodigoAula1_files/figure-latex/unnamed-chunk-2-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#Série Dessazonalizada}
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow=}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+\NormalTok{lpib.sa}\OtherTok{=}\NormalTok{lpib }\SpecialCharTok{{-}}\NormalTok{ sazonal}
+\FunctionTok{plot}\NormalTok{(}\FunctionTok{exp}\NormalTok{(lpib.sa))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CodigoAula1_files/figure-latex/unnamed-chunk-2-2.pdf}
+
+\hypertarget{decomposiuxe7uxe3o-por-muxe9dias-muxf3veis}{%
+\section{Decomposição Por Médias
+Móveis}\label{decomposiuxe7uxe3o-por-muxe9dias-muxf3veis}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#Modelo Multiplicativo}
+\NormalTok{decomp.mm}\OtherTok{=} \FunctionTok{decompose}\NormalTok{(pib,}\AttributeTok{type=}\StringTok{\textquotesingle{}multiplicative\textquotesingle{}}\NormalTok{)}
+\FunctionTok{plot}\NormalTok{(decomp.mm)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CodigoAula1_files/figure-latex/unnamed-chunk-3-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sazonal.mm}\OtherTok{=}\NormalTok{decomp.mm}\SpecialCharTok{$}\NormalTok{seasonal}
+\FunctionTok{View}\NormalTok{(sazonal.mm)}
+
+\NormalTok{tendencia.mm}\OtherTok{=}\NormalTok{decomp.mm}\SpecialCharTok{$}\NormalTok{trend}
+\FunctionTok{View}\NormalTok{(tendencia.mm)}
+
+\NormalTok{residuos.mm}\OtherTok{=}\NormalTok{decomp.mm}\SpecialCharTok{$}\NormalTok{random}
+\FunctionTok{View}\NormalTok{(residuos.mm)}
+
+\NormalTok{indice.saz}\OtherTok{=}\NormalTok{decomp.mm}\SpecialCharTok{$}\NormalTok{figure}
+\NormalTok{indice.saz}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1.2025213 1.1260160 0.9626454 0.7088173
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{dessaz.pib}\OtherTok{=}\FunctionTok{ts}\NormalTok{(pib}\SpecialCharTok{/}\NormalTok{sazonal.mm,}\AttributeTok{start=}\FunctionTok{c}\NormalTok{(}\DecValTok{1996}\NormalTok{,}\DecValTok{1}\NormalTok{),}\AttributeTok{freq=}\DecValTok{4}\NormalTok{)}
+\FunctionTok{plot}\NormalTok{(dessaz.pib, }\AttributeTok{main=}\StringTok{\textquotesingle{}Log(PIB) dessazonalizado\textquotesingle{}}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CodigoAula1_files/figure-latex/unnamed-chunk-3-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#Modelo Aditivo}
+\NormalTok{aditivo.mm}\OtherTok{=} \FunctionTok{decompose}\NormalTok{(pib,}\AttributeTok{type=}\StringTok{\textquotesingle{}additive\textquotesingle{}}\NormalTok{)}
+\FunctionTok{plot}\NormalTok{(aditivo.mm)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CodigoAula1_files/figure-latex/unnamed-chunk-3-3.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Saz.aditivo}\OtherTok{=}\NormalTok{aditivo.mm}\SpecialCharTok{$}\NormalTok{seasonal}
+\FunctionTok{View}\NormalTok{(Saz.aditivo)}
+
+\NormalTok{tendencia.aditivo}\OtherTok{=}\NormalTok{aditivo.mm}\SpecialCharTok{$}\NormalTok{trend}
+\FunctionTok{View}\NormalTok{(tendencia.aditivo)}
+
+\NormalTok{residuos.aditivo}\OtherTok{=}\NormalTok{aditivo.mm}\SpecialCharTok{$}\NormalTok{random}
+\FunctionTok{View}\NormalTok{(residuos.aditivo)}
+
+\NormalTok{aditivo.saz}\OtherTok{=}\NormalTok{aditivo.mm}\SpecialCharTok{$}\NormalTok{figure}
+\NormalTok{aditivo.saz}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1]  13609.410   7287.356  -3978.587 -16918.179
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pib.aditivo}\OtherTok{=}\FunctionTok{ts}\NormalTok{(pib }\SpecialCharTok{{-}}\NormalTok{ Saz.aditivo,}\AttributeTok{start=}\FunctionTok{c}\NormalTok{(}\DecValTok{1996}\NormalTok{,}\DecValTok{1}\NormalTok{),}\AttributeTok{freq=}\DecValTok{4}\NormalTok{)}
+\FunctionTok{plot}\NormalTok{(pib.aditivo, }\AttributeTok{main=}\StringTok{\textquotesingle{}PIB dessazonalizado\textquotesingle{}}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CodigoAula1_files/figure-latex/unnamed-chunk-3-4.pdf}
+
+\hypertarget{modelo-de-suavizauxe7uxe3o-exponencial-simples}{%
+\section{Modelo de suavização exponencial
+simples}\label{modelo-de-suavizauxe7uxe3o-exponencial-simples}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ajuste}\OtherTok{\textless{}{-}}\FunctionTok{HoltWinters}\NormalTok{(pib,}\AttributeTok{beta=}\ConstantTok{FALSE}\NormalTok{, }\AttributeTok{gamma=}\ConstantTok{FALSE}\NormalTok{)}
+\NormalTok{ajuste}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Holt-Winters exponential smoothing without trend and without seasonal component.
+## 
+## Call:
+## HoltWinters(x = pib, beta = FALSE, gamma = FALSE)
+## 
+## Smoothing parameters:
+##  alpha: 0.2716791
+##  beta : FALSE
+##  gamma: FALSE
+## 
+## Coefficients:
+##       [,1]
+## a 149201.4
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{fitted}\NormalTok{(ajuste)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##              xhat     level
+## 1996 Q2  10053.71  10053.71
+## 1996 Q3  10230.04  10230.04
+## 1996 Q4  10465.31  10465.31
+## 1997 Q1  10041.73  10041.73
+## 1997 Q2  10665.55  10665.55
+## 1997 Q3  10926.24  10926.24
+## 1997 Q4  10911.33  10911.33
+## 1998 Q1  10601.65  10601.65
+## 1998 Q2  10945.92  10945.92
+## 1998 Q3  11830.44  11830.44
+## 1998 Q4  12186.96  12186.96
+## 1999 Q1  11157.82  11157.82
+## 1999 Q2  11981.65  11981.65
+## 1999 Q3  12390.70  12390.70
+## 1999 Q4  12212.83  12212.83
+## 2000 Q1  11916.30  11916.30
+## 2000 Q2  13119.99  13119.99
+## 2000 Q3  13689.91  13689.91
+## 2000 Q4  14094.12  14094.12
+## 2001 Q1  13041.61  13041.61
+## 2001 Q2  14248.89  14248.89
+## 2001 Q3  15081.67  15081.67
+## 2001 Q4  14976.49  14976.49
+## 2002 Q1  14623.14  14623.14
+## 2002 Q2  16647.42  16647.42
+## 2002 Q3  17975.03  17975.03
+## 2002 Q4  18922.59  18922.59
+## 2003 Q1  18249.25  18249.25
+## 2003 Q2  21672.49  21672.49
+## 2003 Q3  23718.89  23718.89
+## 2003 Q4  24180.39  24180.39
+## 2004 Q1  23174.29  23174.29
+## 2004 Q2  26208.69  26208.69
+## 2004 Q3  28484.45  28484.45
+## 2004 Q4  27571.36  27571.36
+## 2005 Q1  24661.44  24661.44
+## 2005 Q2  25456.70  25456.70
+## 2005 Q3  25923.26  25923.26
+## 2005 Q4  26072.40  26072.40
+## 2006 Q1  24347.31  24347.31
+## 2006 Q2  25357.44  25357.44
+## 2006 Q3  25586.64  25586.64
+## 2006 Q4  26422.12  26422.12
+## 2007 Q1  25320.06  25320.06
+## 2007 Q2  27772.21  27772.21
+## 2007 Q3  29115.88  29115.88
+## 2007 Q4  29307.51  29307.51
+## 2008 Q1  27666.30  27666.30
+## 2008 Q2  31672.58  31672.58
+## 2008 Q3  34828.51  34828.51
+## 2008 Q4  34612.84  34612.84
+## 2009 Q1  31271.74  31271.74
+## 2009 Q2  33963.08  33963.08
+## 2009 Q3  35856.14  35856.14
+## 2009 Q4  36434.84  36434.84
+## 2010 Q1  34446.81  34446.81
+## 2010 Q2  36977.91  36977.91
+## 2010 Q3  37897.25  37897.25
+## 2010 Q4  38980.33  38980.33
+## 2011 Q1  37606.35  37606.35
+## 2011 Q2  41989.04  41989.04
+## 2011 Q3  45205.43  45205.43
+## 2011 Q4  46114.29  46114.29
+## 2012 Q1  42797.84  42797.84
+## 2012 Q2  45925.32  45925.32
+## 2012 Q3  48531.53  48531.53
+## 2012 Q4  49392.14  49392.14
+## 2013 Q1  46614.43  46614.43
+## 2013 Q2  53071.76  53071.76
+## 2013 Q3  56477.17  56477.17
+## 2013 Q4  57075.10  57075.10
+## 2014 Q1  53963.78  53963.78
+## 2014 Q2  59443.55  59443.55
+## 2014 Q3  63070.71  63070.71
+## 2014 Q4  61931.05  61931.05
+## 2015 Q1  57105.99  57105.99
+## 2015 Q2  62943.59  62943.59
+## 2015 Q3  65437.92  65437.92
+## 2015 Q4  64266.80  64266.80
+## 2016 Q1  59608.89  59608.89
+## 2016 Q2  67242.31  67242.31
+## 2016 Q3  73040.47  73040.47
+## 2016 Q4  73928.17  73928.17
+## 2017 Q1  68529.52  68529.52
+## 2017 Q2  76511.73  76511.73
+## 2017 Q3  78655.53  78655.53
+## 2017 Q4  76409.36  76409.36
+## 2018 Q1  69307.84  69307.84
+## 2018 Q2  77006.37  77006.37
+## 2018 Q3  81922.02  81922.02
+## 2018 Q4  77721.33  77721.33
+## 2019 Q1  70300.40  70300.40
+## 2019 Q2  77083.86  77083.86
+## 2019 Q3  78892.35  78892.35
+## 2019 Q4  77927.10  77927.10
+## 2020 Q1  72069.11  72069.11
+## 2020 Q2  86744.53  86744.53
+## 2020 Q3  97565.02  97565.02
+## 2020 Q4  98590.55  98590.55
+## 2021 Q1  93708.84  93708.84
+## 2021 Q2 141581.38 141581.38
+## 2021 Q3 155332.60 155332.60
+## 2021 Q4 146467.67 146467.67
+## 2022 Q1 128796.26 128796.26
+## 2022 Q2 148877.79 148877.79
+## 2022 Q3 161359.23 161359.23
+## 2022 Q4 161407.62 161407.62
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow=}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{))}
+\FunctionTok{plot}\NormalTok{(ajuste)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CodigoAula1_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+\#Modelo de suavização exponencial de Holt
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ajuste\_holt}\OtherTok{=}\FunctionTok{HoltWinters}\NormalTok{(pib, }\AttributeTok{gamma=}\ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in HoltWinters(pib, gamma = FALSE): optimization difficulties: ERROR:
+## ABNORMAL_TERMINATION_IN_LNSRCH
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ajuste\_holt}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Holt-Winters exponential smoothing with trend and without seasonal component.
+## 
+## Call:
+## HoltWinters(x = pib, gamma = FALSE)
+## 
+## Smoothing parameters:
+##  alpha: 0.1644466
+##  beta : 0.06496063
+##  gamma: FALSE
+## 
+## Coefficients:
+##         [,1]
+## a 158246.274
+## b   3683.811
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{fitted}\NormalTok{(ajuste\_holt)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##              xhat     level     trend
+## 1996 Q3  11351.72  10702.72  649.0024
+## 1996 Q4  11955.95  11309.67  646.2711
+## 1997 Q1  12068.11  11454.42  613.6917
+## 1997 Q2  12729.06  12112.48  616.5740
+## 1997 Q3  13152.30  12547.51  604.7810
+## 1997 Q4  13357.61  12777.20  580.4145
+## 1998 Q1  13309.99  12767.88  542.1052
+## 1998 Q2  13599.71  13073.00  526.7101
+## 1998 Q3  14231.84  13698.70  533.1407
+## 1998 Q4  14574.24  14052.74  521.5061
+## 1999 Q1  14014.26  13558.73  455.5375
+## 1999 Q2  14500.61  14043.19  457.4167
+## 1999 Q3  14780.56  14333.97  446.5917
+## 1999 Q4  14693.96  14279.90  414.0681
+## 2000 Q1  14482.36  14106.46  375.9036
+## 2000 Q2  15184.80  14788.97  395.8211
+## 2000 Q3  15586.39  15190.22  396.1732
+## 2000 Q4  15910.99  15519.19  391.8077
+## 2001 Q1  15306.15  14975.14  331.0138
+## 2001 Q2  16018.81  15664.52  354.2936
+## 2001 Q3  16599.97  16231.83  368.1317
+## 2001 Q4  16634.39  16286.62  347.7764
+## 2002 Q1  16464.05  16147.88  316.1722
+## 2002 Q2  17762.71  17386.61  376.1021
+## 2002 Q3  18799.29  18382.90  416.3901
+## 2002 Q4  19682.15  19237.30  444.8435
+## 2003 Q1  19559.92  19149.67  410.2533
+## 2003 Q2  21947.32  21416.46  530.8554
+## 2003 Q3  23749.19  23140.80  608.3849
+## 2003 Q4  24649.76  24023.55  626.2079
+## 2004 Q1  24545.22  23963.58  581.6334
+## 2004 Q2  26842.79  26156.49  686.3026
+## 2004 Q3  28885.04  28116.02  769.0126
+## 2004 Q4  28995.30  28266.47  728.8302
+## 2005 Q1  27598.97  26999.77  599.1993
+## 2005 Q2  28196.36  27597.27  599.0891
+## 2005 Q3  28616.41  28028.24  588.1677
+## 2005 Q4  28829.06  28263.80  565.2622
+## 2006 Q1  27799.53  27331.55  467.9828
+## 2006 Q2  28314.08  27843.25  470.8230
+## 2006 Q3  28414.85  27966.60  448.2506
+## 2006 Q4  28906.36  28455.47  450.8895
+## 2007 Q1  28211.79  27830.77  381.0181
+## 2007 Q2  29667.08  29220.53  446.5469
+## 2007 Q3  30647.93  30168.79  479.1386
+## 2007 Q4  30982.29  30511.98  470.3073
+## 2008 Q1  30101.34  29713.46  387.8830
+## 2008 Q2  32645.30  32125.90  519.3995
+## 2008 Q3  35028.71  34395.61  633.1011
+## 2008 Q4  35487.73  34865.25  622.4822
+## 2009 Q1  33803.26  33321.50  481.7624
+## 2009 Q2  35576.56  35016.02  560.5442
+## 2009 Q3  37074.84  36457.09  617.7440
+## 2009 Q4  37852.20  37224.72  627.4801
+## 2010 Q1  36949.93  36415.77  534.1687
+## 2010 Q2  38677.33  38070.37  606.9531
+## 2010 Q3  39579.29  38954.34  624.9480
+## 2010 Q4  40607.83  39958.27  649.5669
+## 2011 Q1  40086.69  39508.53  578.1554
+## 2011 Q2  43055.62  42331.63  723.9885
+## 2011 Q3  45666.16  44827.10  839.0646
+## 2011 Q4  47010.41  46140.53  869.8798
+## 2012 Q1  45585.51  44855.60  729.9025
+## 2012 Q2  47843.23  47020.14  823.0970
+## 2012 Q3  50010.46  49105.38  905.0865
+## 2012 Q4  51211.30  50288.18  923.1270
+## 2013 Q1  50025.29  49230.81  794.4731
+## 2013 Q2  54384.92  53372.98 1011.9415
+## 2013 Q3  57362.08  56230.26 1131.8159
+## 2013 Q4  58724.36  57578.48 1145.8737
+## 2014 Q1  57575.78  56569.87 1005.9167
+## 2014 Q2  61481.49  60298.69 1182.7985
+## 2014 Q3  64645.52  63341.87 1303.6498
+## 2014 Q4  64938.73  63696.71 1242.0148
+## 2015 Q1  62543.70  61523.53 1020.1616
+## 2015 Q2  66374.57  65182.96 1191.6100
+## 2015 Q3  68573.21  67320.17 1253.0369
+## 2015 Q4  68522.24  67348.74 1173.4948
+## 2016 Q1  65947.91  65003.03  944.8847
+## 2016 Q2  70703.29  69525.97 1177.3176
+## 2016 Q3  75012.08  73643.75 1368.3318
+## 2016 Q4  76607.35  75225.18 1382.1748
+## 2017 Q1  74040.26  72898.98 1141.2767
+## 2017 Q2  79361.92  77965.65 1396.2725
+## 2017 Q3  81640.98  80190.85 1450.1205
+## 2017 Q4  81120.34  79790.43 1329.9077
+## 2018 Q1  77047.45  76047.10 1000.3471
+## 2018 Q2  81654.97  80434.59 1220.3781
+## 2018 Q3  85229.96  83865.95 1364.0051
+## 2018 Q4  83306.81  82143.31 1163.4947
+## 2019 Q1  78708.46  77896.43  812.0331
+## 2019 Q2  82420.74  81431.80  988.9425
+## 2019 Q3  83640.82  82637.78 1003.0416
+## 2019 Q4  83190.05  82275.69  914.3617
+## 2020 Q1  79406.55  78778.75  627.8010
+## 2020 Q2  88209.39  87082.92 1126.4629
+## 2020 Q3  96054.39  94518.11 1536.2816
+## 2020 Q4  98516.30  96923.56 1592.7433
+## 2021 Q1  96975.21  95573.63 1401.5852
+## 2021 Q2 128664.25 125415.18 3249.0637
+## 2021 Q3 143039.76 139112.00 3927.7564
+## 2021 Q4 143405.86 139695.36 3710.5021
+## 2022 Q1 136261.27 133212.91 3048.3615
+## 2022 Q2 150947.20 147188.97 3758.2315
+## 2022 Q3 162388.78 158161.88 4226.9015
+## 2022 Q4 166466.57 162248.76 4217.8061
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{plot.ts}\NormalTok{(pib,}\AttributeTok{ylab=}\StringTok{\textquotesingle{}Valores Observados/Ajustados\textquotesingle{}}\NormalTok{,}\AttributeTok{xlab=}\StringTok{\textquotesingle{}Tempo\textquotesingle{}}\NormalTok{,}\AttributeTok{main=}\StringTok{\textquotesingle{}\textquotesingle{}}\NormalTok{)}
+\FunctionTok{lines}\NormalTok{(}\FunctionTok{fitted}\NormalTok{(ajuste\_holt)[,}\DecValTok{1}\NormalTok{],}\AttributeTok{lwd=}\DecValTok{1}\NormalTok{,}\AttributeTok{col=}\StringTok{\textquotesingle{}red\textquotesingle{}}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CodigoAula1_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+\#Modelo de suavização exponencial de Holt-Winters (additive ou
+multiplicative)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ajuste\_hw}\OtherTok{=}\FunctionTok{HoltWinters}\NormalTok{(pib,}\AttributeTok{seasonal =} \StringTok{\textquotesingle{}multiplicative\textquotesingle{}}\NormalTok{)}
+\NormalTok{ajuste\_hw}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Holt-Winters exponential smoothing with trend and multiplicative seasonal component.
+## 
+## Call:
+## HoltWinters(x = pib, seasonal = "multiplicative")
+## 
+## Smoothing parameters:
+##  alpha: 0.656106
+##  beta : 0.05846886
+##  gamma: 1
+## 
+## Coefficients:
+##            [,1]
+## a  1.766363e+05
+## b  4.567402e+03
+## s1 1.627381e+00
+## s2 1.299161e+00
+## s3 9.311304e-01
+## s4 6.594281e-01
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{fitted}\NormalTok{(ajuste\_hw)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##               xhat     level     trend    season
+## 1997 Q1  11731.277  10391.55  179.1536 1.1097920
+## 1997 Q2  11553.413  10929.35  200.1234 1.0380918
+## 1997 Q3  11884.825  11174.78  202.7726 1.0445853
+## 1997 Q4   8807.362  10740.98  165.5530 0.8075308
+## 1998 Q1  13435.031  11689.85  211.3524 1.1288803
+## 1998 Q2  11598.344  10990.93  158.1299 1.0402980
+## 1998 Q3  13203.413  12790.96  254.1300 1.0121366
+## 1998 Q4  11081.911  13005.75  251.8296 0.8358928
+## 1999 Q1  12181.343  11151.62  128.6968 1.0798759
+## 1999 Q2  14101.686  12500.84  200.0592 1.1102907
+## 1999 Q3  12648.475  12337.82  178.8307 1.0105317
+## 1999 Q4   9089.363  11924.22  144.1916 0.7531534
+## 2000 Q1  15989.861  13838.58  247.6912 1.1351383
+## 2000 Q2  15908.140  14292.61  259.7559 1.0931652
+## 2000 Q3  14146.661  14138.00  235.5286 0.9842161
+## 2000 Q4  12325.242  15060.87  275.7167 0.8036494
+## 2001 Q1  15775.572  13617.89  175.2262 1.1437280
+## 2001 Q2  16152.615  14773.96  232.5750 1.0763722
+## 2001 Q3  16112.614  15714.58  273.9737 1.0077593
+## 2001 Q4  11471.394  15065.28  219.9912 0.7504866
+## 2002 Q1  20765.253  17212.55  332.6765 1.1835274
+## 2002 Q2  20543.926  18270.82  375.1012 1.1017920
+## 2002 Q3  19161.626  19235.55  409.5765 0.9753881
+## 2002 Q4  17235.878  21193.06  500.0824 0.7945310
+## 2003 Q1  25976.959  21039.35  461.8555 1.2081631
+## 2003 Q2  27723.026  24147.31  616.5706 1.1194943
+## 2003 Q3  26634.494  25632.37  667.3501 1.0127291
+## 2003 Q4  20424.978  25511.35  621.2548 0.7815898
+## 2004 Q1  34238.739  26176.37  623.8139 1.2775560
+## 2004 Q2  31311.035  26853.92  626.9554 1.1393757
+## 2004 Q3  29992.939  29366.36  737.1978 0.9963254
+## 2004 Q4  21470.815  26896.93  549.7099 0.7822748
+## 2005 Q1  30570.100  23579.89  323.6252 1.2788958
+## 2005 Q2  26626.043  22373.95  234.1935 1.1777191
+## 2005 Q3  21638.089  22913.41  252.0422 0.9340671
+## 2005 Q4  19314.296  26561.03  450.5778 0.7150368
+## 2006 Q1  34351.888  27386.34  472.4879 1.2330701
+## 2006 Q2  29400.426  24513.84  276.9105 1.1859432
+## 2006 Q3  23116.616  23020.76  173.4207 0.9966560
+## 2006 Q4  19611.193  26844.67  386.8606 0.7201650
+## 2007 Q1  34660.742  29740.98  533.5857 1.1448797
+## 2007 Q2  34846.986  30094.18  523.0388 1.1381498
+## 2007 Q3  31861.274  29389.93  451.2805 1.0676937
+## 2007 Q4  21782.539  28587.59  377.9825 0.7520149
+## 2008 Q1  35053.322  30260.28  453.6829 1.1412828
+## 2008 Q2  39682.267  34944.74  701.0516 1.1132384
+## 2008 Q3  40262.365  37771.46  825.3370 1.0431529
+## 2008 Q4  27123.085  34679.80  596.3147 0.7688795
+## 2009 Q1  38267.631  31173.14  356.4179 1.2137068
+## 2009 Q2  38452.316  33102.87  448.4082 1.1460759
+## 2009 Q3  34841.281  34970.32  531.3778 0.9813975
+## 2009 Q4  27386.865  37604.24  654.3108 0.7158365
+## 2010 Q1  50493.611  39844.56  747.0433 1.2439422
+## 2010 Q2  43987.057  37041.78  539.4889 1.1704517
+## 2010 Q3  36335.187  35549.12  420.6715 1.0101584
+## 2010 Q4  29380.735  39573.71  631.3885 0.7307714
+## 2011 Q1  53346.475  44283.23  869.8324 1.1814586
+## 2011 Q2  52515.006  45370.60  882.5517 1.1353821
+## 2011 Q3  50737.279  47011.88  926.9132 1.0583763
+## 2011 Q4  36334.305  46583.35  847.6620 0.7660454
+## 2012 Q1  54576.312  45352.10  726.1107 1.1844277
+## 2012 Q2  53411.191  45930.41  717.4690 1.1449864
+## 2012 Q3  50697.834  47855.32  788.0665 1.0422349
+## 2012 Q4  37455.811  49273.79  824.9257 0.7476401
+## 2013 Q1  62094.135  51601.23  912.7758 1.1824300
+## 2013 Q2  67629.452  57113.12 1181.6805 1.1601285
+## 2013 Q3  61133.535  57150.69 1114.7859 1.0492240
+## 2013 Q4  43838.961  56729.99 1025.0079 0.7590505
+## 2014 Q1  74448.162  59297.00 1115.1668 1.2323373
+## 2014 Q2  70427.255  60244.79 1105.3806 1.1479554
+## 2014 Q3  66081.441  62703.12 1184.4862 1.0343389
+## 2014 Q4  46343.953  59316.92  917.2431 0.7693965
+## 2015 Q1  72835.831  58381.11  808.8971 1.2305428
+## 2015 Q2  73427.077  62259.67  988.3773 1.1609382
+## 2015 Q3  62985.526  62512.06  945.3444 0.9925639
+## 2015 Q4  47743.155  62229.03  873.5228 0.7565963
+## 2016 Q1  80039.939  62563.82  842.0242 1.2623431
+## 2016 Q2  78993.527  67390.35 1074.9934 1.1537739
+## 2016 Q3  73979.618  73919.20 1393.8743 0.9822945
+## 2016 Q4  59014.057  76868.23 1484.8024 0.7531816
+## 2017 Q1  97957.225  74034.66 1232.3121 1.3014636
+## 2017 Q2  91646.341  75243.45 1230.9365 1.1983927
+## 2017 Q3  72971.806  72508.55  999.0589 0.9927109
+## 2017 Q4  53081.501  71799.78  899.2039 0.7301547
+## 2018 Q1  92289.987  70172.59  751.4889 1.3012503
+## 2018 Q2  86759.577  73623.98  909.3488 1.1640373
+## 2018 Q3  78837.104  79234.36 1184.2130 0.9803345
+## 2018 Q4  52177.206  72135.03  699.8834 0.7163763
+## 2019 Q1  95249.522  71212.99  605.0513 1.3262618
+## 2019 Q2  86937.103  71827.70  605.6161 1.2002364
+## 2019 Q3  65588.820  70685.94  503.4489 0.9213286
+## 2019 Q4  55948.239  78133.10  909.4400 0.7078244
+## 2020 Q1 106586.999  79428.80  932.0239 1.3263553
+## 2020 Q2 108401.809  90006.64 1496.0042 1.1846849
+## 2020 Q3  99944.501 101566.13 2084.4047 0.9642449
+## 2020 Q4  75745.654 104599.95 2139.9157 0.7096285
+## 2021 Q1 159210.137 111248.31 2403.5196 1.4008585
+## 2021 Q2 213025.296 165503.29 5435.2155 1.2462101
+## 2021 Q3 159631.476 159972.83 4794.0647 0.9688322
+## 2021 Q4 103697.551 139758.08 3331.8276 0.7247021
+## 2022 Q1 203985.979 122923.29 2152.7085 1.6308963
+## 2022 Q2 152205.636 124563.72 2122.7561 1.2014356
+## 2022 Q3 134715.994 149958.06 3483.4196 0.8779633
+## 2022 Q4 117997.589 173485.21 4655.3533 0.6623848
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{plot}\NormalTok{(pib,}\AttributeTok{ylim=}\FunctionTok{c}\NormalTok{(}\FunctionTok{min}\NormalTok{(pib),}\FunctionTok{max}\NormalTok{(pib)),}\AttributeTok{ylab=}\StringTok{\textquotesingle{}Valores Observados/Ajustados\textquotesingle{}}\NormalTok{,}\AttributeTok{xlab=}\StringTok{\textquotesingle{}Tempo\textquotesingle{}}\NormalTok{,}\AttributeTok{main=}\StringTok{\textquotesingle{}\textquotesingle{}}\NormalTok{)}
+\FunctionTok{lines}\NormalTok{(}\FunctionTok{fitted}\NormalTok{(ajuste\_hw)[,}\DecValTok{1}\NormalTok{],}\AttributeTok{lwd=}\DecValTok{1}\NormalTok{,}\AttributeTok{col=}\StringTok{\textquotesingle{}red\textquotesingle{}}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{CodigoAula1_files/figure-latex/unnamed-chunk-6-1.pdf}
+
+\end{document}

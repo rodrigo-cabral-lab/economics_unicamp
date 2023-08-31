@@ -1,0 +1,166 @@
+---
+title: "Decomposição de Série Temporal"
+author: "R Ballini"
+date: "07/03/2023"
+output:
+  pdf_document:
+    toc: yes
+  html_document:
+    toc: yes
+  word_document:
+    toc: yes
+    
+install_tinytex()
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Exemplo - PIB trimestral (1995=100) - Dados observados - Produto Interno Bruto a preços de mercado
+
+```{r}
+library(readxl)
+
+dados= read_excel('PIB_Agropecuaria.xlsx')
+View(dados)
+
+pib = ts(dados[,2], start=c(1996,1), freq=4)
+plot(pib,ylab='PIB',xlab='Anos')
+
+lpib=ts(log(dados[,2]), start=c(1996,1), freq=4)
+plot(lpib,ylab='log(PIB)',xlab='Anos')
+
+```
+
+## Decomposição da Série Temporal
+```{r}
+t=ts(seq(1:length(lpib)),start=c(1996,1), freq=4)
+
+#Construir as binárias
+#install.packages('gets')
+library(gets)
+
+d=ts(periodicdummies(lpib),start=c(1996,1), freq=4)
+View(d)
+
+modelo = lm(lpib ~ t +d[,1:3])
+summary(modelo)
+
+b=modelo$coefficients
+b
+
+tendencia=ts(b[1] + b[2]*t,start=c(1996,1), freq=4)
+View(tendencia)
+sazonal = ts(b[3]*d[,1] + b[4]*d[,2] + b[5]*d[,3],start=c(1996,1),freq=4)
+View(sazonal)
+res=ts(modelo$residuals,start=c(1996,1),freq=4)
+View(res)
+
+par(mfrow=c(2,2))
+plot(lpib, ylab='log(PIB)')
+plot(tendencia)
+plot(sazonal)
+plot(res)
+
+#Série Dessazonalizada
+par(mfrow=c(1,1))
+lpib.sa=lpib - sazonal
+plot(exp(lpib.sa))
+```
+
+
+# Decomposição Por Médias Móveis
+
+```{r}
+#Modelo Multiplicativo
+decomp.mm= decompose(pib,type='multiplicative')
+plot(decomp.mm)
+
+sazonal.mm=decomp.mm$seasonal
+View(sazonal.mm)
+
+tendencia.mm=decomp.mm$trend
+View(tendencia.mm)
+
+residuos.mm=decomp.mm$random
+View(residuos.mm)
+
+indice.saz=decomp.mm$figure
+indice.saz
+
+dessaz.pib=ts(pib/sazonal.mm,start=c(1996,1),freq=4)
+plot(dessaz.pib, main='Log(PIB) dessazonalizado')
+
+
+#Modelo Aditivo
+aditivo.mm= decompose(pib,type='additive')
+plot(aditivo.mm)
+
+Saz.aditivo=aditivo.mm$seasonal
+View(Saz.aditivo)
+
+tendencia.aditivo=aditivo.mm$trend
+View(tendencia.aditivo)
+
+residuos.aditivo=aditivo.mm$random
+View(residuos.aditivo)
+
+aditivo.saz=aditivo.mm$figure
+aditivo.saz
+
+pib.aditivo=ts(pib - Saz.aditivo,start=c(1996,1),freq=4)
+plot(pib.aditivo, main='PIB dessazonalizado')
+
+```
+
+# Modelo de suavização exponencial simples
+```{r}
+ajuste<-HoltWinters(pib,beta=FALSE, gamma=FALSE)
+ajuste
+fitted(ajuste)
+par(mfrow=c(1,1))
+plot(ajuste)
+```
+
+#Modelo de suavização exponencial de Holt
+```{r}
+
+ajuste_holt=HoltWinters(pib, gamma=FALSE)
+ajuste_holt
+fitted(ajuste_holt)
+
+plot.ts(pib,ylab='Valores Observados/Ajustados',xlab='Tempo',main='')
+lines(fitted(ajuste_holt)[,1],lwd=1,col='red')
+```
+
+#Modelo de suavização exponencial de Holt-Winters (additive ou multiplicative)
+```{r}
+
+ajuste_hw=HoltWinters(pib,seasonal = 'multiplicative')
+ajuste_hw
+fitted(ajuste_hw)
+
+plot(pib,ylim=c(min(pib),max(pib)),ylab='Valores Observados/Ajustados',xlab='Tempo',main='')
+lines(fitted(ajuste_hw)[,1],lwd=1,col='red')
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

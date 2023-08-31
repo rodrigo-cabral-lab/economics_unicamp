@@ -1,0 +1,89 @@
+---
+title: "Testes RU -- Parte II"
+author: "Rodrigo Cabral"
+date: "21/04/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Energia Industrial
+```{r}
+library(readxl)
+
+energ=read_excel('energia_industrial.xlsx')
+
+energ = ts(energ[,2],start=c(1979,1),freq=12)
+
+plot(energ,ylab='Consumo de energia industrial (GWh)', main='Consumo de energia industrial (GWh)')
+acf(energ,main='Consumo de energia industrial (GWh)')
+
+```
+
+## Teste de Dickey-Pantula
+
+```{r}
+#install.packages('dynlm')
+library(dynlm)
+
+#Passo 1: Teste para 2 RU
+etapa1=dynlm(diff(log(energ),1,2)~trend(energ,scale=F)+diff(L(log(energ)),1,1))
+summary(etapa1)
+
+acf(etapa1$residuals,type='correlation')
+acf(etapa1$residuals,type='partial')
+
+etapa1=dynlm(diff(log(energ),1,2)~diff(L(log(energ)),1,1))
+summary(etapa1)
+
+acf(etapa1$residuals,type='correlation')
+acf(etapa1$residuals,type='partial')
+
+etapa1=dynlm(diff(log(energ),1,2)~diff(L(log(energ)),1,1)-1)
+summary(etapa1)
+
+acf(etapa1$residuals,type='correlation')
+acf(etapa1$residuals,type='partial')
+
+
+#Etapa 2: Teste para 1 RU
+etapa2=dynlm(diff(log(energ),1,2)~diff(L(log(energ)),1,1)+L(log(energ)))
+summary(etapa2)
+
+acf(etapa2$residuals,type='correlation')
+acf(etapa2$residuals,type='partial')
+```
+
+
+# Teste de Raiz Unitária Sazonal
+
+```{r}
+#install.packages('urca')
+library(urca)
+
+#install.packages('uroot')
+library(uroot)
+
+#deterministic = a vector of length three containing zeros or ones to indicate, respectively, whether a constant, a trend or seasonal dummies are included in the regression equation of the test.
+sazonal.ur=hegy.test(energ, deterministic = c(1,1,1), lag.method = "fixed", maxlag = 1)
+
+sazonal.ur=hegy.test(energ,deterministic = c(1,1,1), lag.method = "BIC", maxlag = 12)
+sazonal.ur$fitted.model
+sazonal.ur$statistics
+sazonal.ur$pvalues
+
+#Teste DHF
+#Instalando e carregando pacote de Dummies sazonais
+#install.packages("gets")
+library(gets)
+
+teste.sazonal=dynlm(diff(energ,1,4)~trend(energ,scale=F)+ season(energ) + L(energ,4)+diff(L(energ,1:4),1,12))
+summary(teste.sazonal)         
+acf(teste.sazonal$residuals)
+pacf(teste.sazonal$residuals)
+
+
+```
+

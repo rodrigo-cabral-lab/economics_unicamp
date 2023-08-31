@@ -1,0 +1,91 @@
+---
+title: "Geração de Séries Sintéticas"
+author: "R Ballini"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# a) RB Gaussiano
+```{r}
+n=200
+
+set.seed(12345)
+epsilon=ts(rnorm(n))
+View(epsilon)
+
+mean(epsilon)
+sd(epsilon)
+
+plot(epsilon)
+
+cor(epsilon[1:(n-1)],epsilon[2:n])
+2/sqrt(n)
+acf(epsilon)
+```
+
+```{r}
+y2=ts(rep(0,n))
+
+for (i in 1:n){
+  y2[i]=0.5 + 0.1*i + epsilon[i]
+}
+plot(y2)
+acf(y2)
+  
+```
+
+```{r}
+set.seed(123456)
+epsilon2=ts(rnorm(n,0,5))
+
+y3=ts(rep(0,n))
+for (i in 2:n){
+  y3[i]= y3[i-1] + epsilon2[i]
+}
+
+plot(y3)
+acf(y3)
+
+```
+
+```{r}
+y4=ts(rep(0,n))
+for (i in 2:n){
+  y4[i]= 0.7*y4[i-1] + epsilon[i]
+}
+
+plot(y4)
+acf(y4)
+
+```
+
+```{r}
+y5=ts(rep(0,n))
+for (i in 2:n){
+  y5[i]= -0.8*y5[i-1] + epsilon[i]
+}
+
+plot(y5)
+acf(y5)
+```
+
+```{r}
+y6=ts(cumsum(1+epsilon))
+
+plot(y6)
+acf(y6)
+```
+
+```{r}
+y7=ts(rep(0,n))
+
+for (i in 2:n){
+  y7[i]=3+0.5*i + y7[i-1]+epsilon[i]
+}
+plot(y7)
+acf(y7)
+```
+

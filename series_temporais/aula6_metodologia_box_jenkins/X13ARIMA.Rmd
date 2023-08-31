@@ -1,0 +1,53 @@
+---
+title: "X13_ARIMA"
+author: "R Ballini"
+date: "2023-05-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readxl)
+
+Dados=read_excel('PIB_Agropecuaria.xlsx')
+
+pib_agro=ts(Dados[,2],start=c(1996,1),freq=4)
+plot(pib_agro,main='PIB Agropecuária Brasil (R$ (milhões))',ylab='PIB',xlab='Trim/Ano',col='blue')
+grid()
+
+monthplot(pib_agro)
+
+```
+
+```{r}
+#install.packages('seasonal')
+library(seasonal)
+
+ajuste=seas(pib_agro)
+
+```
+
+#Verificação
+```{r}
+#Teste de sazonalidade
+qs(ajuste)
+
+summary(ajuste)
+
+plot(ajuste)
+
+ajuste$data
+
+par(mfrow=c(2,2))
+plot(ajuste$data[,1])
+plot(ajuste$data[,2])
+plot(ajuste$data[,4])
+plot(ajuste$data[,5])
+
+```
+
+
+

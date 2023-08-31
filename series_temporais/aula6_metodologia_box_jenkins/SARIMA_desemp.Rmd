@@ -1,0 +1,293 @@
+---
+title: "SARIMA desemp"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Ler Dados
+
+```{r}
+library(readxl)
+library(urca)
+library(strucchange)
+library(forecast)
+library(lmtest)
+require(tseries)
+require(stats)
+library(FinTS)
+library(urca)
+library(TTR)
+library(sandwich)
+
+dados1 = read_excel("TaxaDesemprego.xlsx")
+
+desemp = ts(dados1[,2], start = c(1985,1), freq = 12)
+
+#Gráfico da série
+plot(desemp, ylab='Taxa de Desemprego', xlab='Anos')
+grid()
+
+#Função de Autocorrelação
+Acf(desemp, type='correlation',lag.max = 36)
+
+monthplot(desemp)
+```
+
+# Teste de Raiz Unitária
+## Parte não sazonal
+```{r}
+desemp.trend=ur.df(desemp,type='trend',lags=24,selectlags='BIC')
+summary(desemp.trend)
+
+desemp.drift=ur.df(desemp,type='drift',lags=24,selectlags='BIC')
+summary(desemp.drift)
+
+desemp.none=ur.df(desemp,type='none',lags=24,selectlags='BIC')
+summary(desemp.none)
+
+```
+
+
+# Primeira diferença
+```{r}
+ts.plot(diff(desemp,lag=1,differences=1),ylab="Diff 1",main=expression(y[t]-y[t-1]))
+Acf(diff(desemp,lag=1,differences=1),ylab="Diff 1",lag.max = 36)
+```
+
+# Teste de estacionariedade da parte sazonal
+```{r}
+Acf(diff(diff(desemp,lag=1,differences=1),lag=12,differences=1),ylab="Diff 1",lag.max = 36)
+```
+
+
+```{r}
+desemp.none=ur.df(diff(diff(desemp,lag=1,differences=1),lag=12,differences=1),type='none',lags=24,selectlags='BIC')
+summary(desemp.none)
+```
+
+# Teste de Raiz Unitária Sazonal
+```{r}
+#Teste DHF
+#Instalando e carregando pacote de Dummies sazonais
+#install.packages("gets")
+library(gets)
+
+teste.sazonal=dynlm(diff(desemp,12,1)~ season(desemp) + L(desemp,12)+ diff(L(desemp,1:12),12,1))
+summary(teste.sazonal)         
+acf(teste.sazonal$residuals)
+
+```
+
+
+# Modelo SARIMA 
+## Escolha pelos critérios de informação AIC e BIC
+# Seleção do modelo considerando os dados de jan/1985 a dez/2015
+
+```{r}
+#valor_param é definido pelo usuário o qual corresponde ao número máximo de ordem para a parte autoregressiva e média móvel
+valor_param=2
+dmat=(valor_param+1)^4 #valor_param+1, pois há três possibilidades para cada ordem do modelo, caso valor_param=2;
+bics = matrix(0,dmat,5) #Matriz com 81 (3^4) linhas e 5 colunas, com valores 0
+aics = matrix(0,dmat,5) 
+
+s = 0
+p_max = valor_param
+q_max = valor_param
+P_max = valor_param
+Q_max = valor_param
+for (i in 0:p_max)
+  for (j in 0:q_max)
+    for (k in 0:P_max)
+      for (l in 0:Q_max){
+        s = s + 1
+        bics[s,] = c(i,j,k,l,Arima(window(desemp,end=c(2015,12)),              order=c(i,1,j),seasonal=list(order=c(k,1,l),period=12), lambda=0)$bic)
+        aics[s,] = c(i,j,k,l,Arima(window(desemp,end=c(2015,12)), 
+order=c(i,1,j),seasonal=list(order=c(k,1,l),period=12), lambda=0)$aic)
+      }
+bics[bics[,5]==min(bics[,5]),]
+aics[aics[,5]==min(aics[,5]),]
+```
+
+# Modelo SARIMA(2,1,2)(0,1,1)_12, critério BIC
+
+```{r}
+desemp.model1 = Arima(window(desemp,end=c(2015,12)),                                    order=c(2,1,2),seasonal=list(order=c(0,1,1),period=12), lambda=0)
+
+desemp.model1
+plot(desemp,ylim=range(desemp,desemp.model1$fit))
+lines(desemp.model1$fit,col=2)
+legend("topleft",legend=c("Data","Fit"),col=1:2,lty=1)
+title("SARIMA(2,1,2)(0,1,1)[12]")
+
+
+```
+
+# Modelo SARIMA(2,1,2)(1,1,1)_12, cirtério AIC
+
+```{r}
+desemp.model2 = Arima(window(desemp,end=c(2015,12)),                                    order=c(2,1,2),seasonal=list(order=c(1,1,1),period=12), lambda=0)
+
+desemp.model2
+plot(desemp,ylim=range(desemp,desemp.model2$fit))
+lines(desemp.model2$fit,col=2)
+legend("topleft",legend=c("Data","Fit"),col=1:2,lty=1)
+title("SARIMA(2,1,2)(1,1,1)[12]")
+```
+
+
+# Avaliação dos resíduos
+
+## Modelo  SARIMA(2,1,2)(0,1,1)_12
+```{r}
+#Autocorrelação 
+Acf(desemp.model1$residuals, type = "correlation",lag.max=36)
+
+#Analise das autocorrelações e teste de Autocorrelação de Ljung-Box
+
+tsdiag(desemp.model1,gof.lag = 24)
+Box.test(desemp.model1$residuals,lag=12,type='Ljung-Box',fitdf =5)
+Box.test(desemp.model1$residuals,lag=24,type='Ljung-Box',fitdf =5)
+Box.test(desemp.model1$residuals,lag=36,type='Ljung-Box',fitdf =5)
+
+#Normalidade dos resíduos
+
+par(mfrow=c(1,1))
+hist(desemp.model1$residuals, freq=F, ylab='Densidade', xlab='Resíduos', main='Resíduos')
+par(new=TRUE)
+plot(density(desemp.model1$residuals), axes=F,ann=F, col=4, lwd=2)  
+
+# Teste de hipótese
+jarque.bera.test(desemp.model1$residuals) # Teste Jarque-Bera
+shapiro.test(desemp.model1$residuals)   # Teste Shapiro-Wilk
+
+#Teste de Heterocedasticidade
+
+ArchTest(desemp.model1$residuals, lag=4) 
+ArchTest(desemp.model1$residuals, lag=8)
+ArchTest(desemp.model1$residuals, lag=12)
+
+checkresiduals(desemp.model1)
+```
+
+
+## Modelo  SARIMA(2,1,2)(1,1,1)_12
+```{r}
+#Autocorrelação 
+Acf(desemp.model2$residuals, type = "correlation",lag.max=36)
+
+#Analise das autocorrelações e teste de Autocorrelação de Ljung-Box
+
+tsdiag(desemp.model2,gof.lag = 24)
+Box.test(desemp.model2$residuals,lag=12,type='Ljung-Box',fitdf =6)
+Box.test(desemp.model2$residuals,lag=24,type='Ljung-Box',fitdf =6)
+Box.test(desemp.model2$residuals,lag=36,type='Ljung-Box',fitdf =6)
+
+#Normalidade dos resíduos
+
+par(mfrow=c(1,1))
+hist(desemp.model2$residuals, freq=F, ylab='Densidade', xlab='Resíduos', main='Resíduos')
+par(new=TRUE)
+plot(density(desemp.model2$residuals), axes=F,ann=F, col=4, lwd=2)  
+
+# Teste de hipótese
+jarque.bera.test(desemp.model2$residuals) # Teste Jarque-Bera
+shapiro.test(desemp.model2$residuals)   # Teste Shapiro-Wilk
+
+#Teste de Heterocedasticidade
+
+ArchTest(desemp.model2$residuals, lag=4) 
+ArchTest(desemp.model2$residuals, lag=8)
+ArchTest(desemp.model2$residuals, lag=12)
+
+checkresiduals(desemp.model2)
+```
+
+
+# Validação do Modelo - cálculo do erro de previsão 1 passo à frente
+## Modelo SARIMA(2,1,2)(0,1,1)_12
+
+```{r}
+
+d.erro1 <- matrix(NA, nrow=length(window(desemp, start=2015)), ncol=1)
+d.real1 <- matrix(NA, nrow=length(window(desemp, start=2015)), ncol=1)
+d.previsto1 <- matrix(NA, nrow=length(window(desemp, start=2015)), ncol=1)
+d.errop1 <- matrix(NA, nrow=length(window(desemp, start=2015)), ncol=1)
+
+for (i in 1:length(d.erro1)){
+  d.previsto1[i] = predict(Arima(desemp[1:(length(window(desemp, end=c(2014, 12)))+i-1)],order=c(2,1,2),seasonal=list(order=c(0,1,1),period=12,method='ML',n.ahead=1)),lambda=0)$pred
+    d.real1[i]=ts(desemp[(length(window(desemp, end=c(2014, 12)))+i)],start=2015, freq=12)
+  d.previsto1=ts(d.previsto1,start=2015,freq=12)
+  d.erro1[i]=d.real1[i]-d.previsto1[i]
+  d.errop1[i]=d.erro1[i]/d.real1[i]
+}
+
+reqm1 <- sqrt(sum(d.erro1^2)/length(d.erro1))
+print(round(reqm1,4))
+eam1 <- sum(abs(d.erro1))/length(d.erro1)
+print(round(eam1,4))
+mape1 <- 100*sum(abs(d.errop1))/length(d.errop1)
+print(round(mape1,4))
+
+plot(d.real1, xlab='N', ylab='Desemprego',col='blue',lty=1)
+lines(d.real1,lty=1)
+par(new=TRUE)
+plot(d.previsto1, axes=F,ann=F, col='red',lty=2)
+legend('topright', c('Desemprego', 'Previsto'), col=c('blue', 'red'), lty=1:2, bty='n')
+grid()
+
+```
+
+## Modelo SARIMA(2,1,2)(1,1,1)_12
+
+```{r}
+
+d.erro2 <- matrix(NA, nrow=length(window(desemp, start=2015)), ncol=1)
+d.real2 <- matrix(NA, nrow=length(window(desemp, start=2015)), ncol=1)
+d.previsto2 <- matrix(NA, nrow=length(window(desemp, start=2015)), ncol=1)
+d.errop2 <- matrix(NA, nrow=length(window(desemp, start=2015)), ncol=1)
+
+for (i in 1:length(d.erro1)){
+  d.previsto2[i] = predict(Arima(desemp[1:(length(window(desemp, end=c(2014, 12)))+i-1)],order=c(2,1,2),seasonal=list(order=c(1,1,1),period=12,method='ML',n.ahead=1)),lambda=0)$pred
+    d.real2[i]=ts(desemp[(length(window(desemp, end=c(2014, 12)))+i)],start=2015, freq=12)
+  d.previsto2=ts(d.previsto2,start=2015,freq=12)
+  d.erro2[i]=d.real2[i]-d.previsto2[i]
+  d.errop2[i]=d.erro2[i]/d.real2[i]
+}
+
+reqm2 <- sqrt(sum(d.erro2^2)/length(d.erro2))
+print(round(reqm2,4))
+eam2 <- sum(abs(d.erro2))/length(d.erro2)
+print(round(eam2,4))
+mape2 <- 100*sum(abs(d.errop2))/length(d.errop2)
+print(round(mape2,4))
+
+plot(d.real2, xlab='N', ylab='Desemprego',col='blue',lty=1)
+lines(d.real2,lty=1)
+par(new=TRUE)
+plot(d.previsto2, axes=F,ann=F, col='red',lty=2)
+legend('topright', c('Desemprego', 'Previsto'), col=c('blue', 'red'), lty=1:2, bty='n')
+grid()
+
+```
+
+
+# Previsão do modelo 12 passos com intervalos de confiança de 90% e 95%
+
+## Modelo SARIMA(2,1,2)(0,1,1)_12
+```{r}
+sarima1=Arima(desemp, order=c(2,1,2),seasonal=list(order=c(0,1,1),period=12), lambda=0)
+d.prev1=forecast(sarima1,h=12,level=c(0.90, 0.95))
+d.prev1
+plot(d.prev1)
+```
+
+## Modelo SARIMA(2,1,2)(1,1,1)_12
+```{r}
+sarima2=Arima(desemp,                                    order=c(2,1,2),seasonal=list(order=c(1,1,1),period=12), lambda=0)
+d.prev2=forecast(sarima2,h=12,level=c(0.90, 0.95))
+d.prev2
+plot(d.prev2)
+```

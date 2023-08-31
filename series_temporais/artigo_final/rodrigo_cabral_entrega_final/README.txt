@@ -1,0 +1,6 @@
+- Nesta pasta estão os arquivos referente a entrega do trabalho final da disciplina de econometria de séries temporais.
+- Na pasta modelagem está o arquivo utilizado para a modelagem VAR em linguagem python versão notebook. 
+- Na pasta dados estão os dados utilizados para o modelo VAR.
+- Na pasta complementares estão arquivos utilizados como auxílio ou secundários para a modelagem principal. 
+- O arquivo projeto_final...pdf é uma breve explicação do projeto final. 
+- O arquivo var_analysis_vfinal.html é uma versão em html do notebook em python, apenas para vizualização e mais compacto do que o pdf. 

@@ -1,0 +1,164 @@
+---
+title: "Modelo VAR"
+author: "R Ballini"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Carregar os Pacotes
+```{r}
+library(MASS)
+library(lmtest)
+library(vars)
+library(urca)
+library(readr)
+library(graphics)
+```
+
+# Leitura dos Dados
+
+```{r}
+#Dados=read_csv('DadosBueno.csv',col_names=T)
+#View(Dados)
+
+Dados=ts(DadosBueno[,2:17],start=c(1994,9),freq=12)
+View(Dados)
+
+layout(matrix(1:4,nrow=2,ncol=2))
+plot(Dados[,1],main='Taxa de Juros',ylab='',xlab='')
+plot(Dados[,2],main='Câmbio',ylab='',xlab='')
+plot(Dados[,3],main='ADM',ylab='',xlab='')
+plot(Dados[,4],main='Livres',ylab='',xlab='')
+
+# Necessário testes de RU
+```
+
+# Modelo VAR
+```{r}
+ordem=VARselect(Dados[,1:4],lag.max=8,type='none',exogen=Dados[,5:16])
+ordem
+```
+
+# Estimação Modelo
+```{r}
+modelo1=VAR(Dados[,1:4],p=2,type='const',exogen=Dados[,5:16])
+summary(modelo1)
+
+summary(modelo1,equation='Livres')
+
+```
+
+# Diagnóstico do Modelo
+```{r}
+# Raízes do Sistema
+roots(modelo1,modulus=T)
+
+roots(modelo1,modulus=F)
+
+plot(stability(modelo1,type='OLS-CUSUM'))
+
+```
+
+
+```{r}
+acf(residuals(modelo1)[,1],main='Juros')
+acf(residuals(modelo1)[,2],main='Câmbio')
+acf(residuals(modelo1)[,3],main='ADM')
+acf(residuals(modelo1)[,4],main='Livres')
+
+```
+
+```{r}
+#Correlação Cruzada
+
+ccf(residuals(modelo1)[,4],residuals(modelo1)[,3],lag.max=16,main='LivresXADM')
+ccf(residuals(modelo1)[,4],residuals(modelo1)[,2],lag.max=16,main='LivresXCâmbio')
+ccf(residuals(modelo1)[,4],residuals(modelo1)[,1],lag.max=16,main='LivresXJuros')
+
+```
+
+```{r}
+# Teste de Autocorrelação
+
+# Teste de Portmanteau - clássico
+teste.pt.asy=serial.test(modelo1,lags.pt=12,type='PT.asymptotic')
+teste.pt.asy
+plot(teste.pt.asy)
+
+# Teste de Portmanteau - ajustado
+teste.pt.adj=serial.test(modelo1,lags.pt=12,type='PT.adjusted')
+teste.pt.adj
+plot(teste.pt.adj)
+
+```
+
+```{r}
+# Teste LM 
+teste.lm=serial.test(modelo1,lags.bg=12,type='BG')
+teste.lm
+plot(teste.lm)
+
+```
+
+```{r}
+# teste ARCH-LM
+teste.arch=arch.test(modelo1,multivariate.only = F)
+teste.arch
+
+```
+
+```{r}
+#Teste de Normalidade
+teste.norm=normality.test(modelo1,multivariate.only = F)
+teste.norm
+```
+
+# Previsão
+```{r}
+predict(modelo1, n.ahead = 8, ci = 0.95, dumvar = Dados[1:8,5:16])
+
+plot(predict(modelo1, n.ahead = 8, ci = 0.95, dumvar = Dados[1:8,5:16]))
+
+fanchart(predict(modelo1, n.ahead = 8, ci = 0.95, dumvar = Dados[1:8,5:16]))
+```
+
+#Causalidade de Granger
+```{r}
+causality(modelo1, cause=c('Juros','Cam'))
+
+
+causality(modelo1, cause = c('Juros','Cam'), vcov.=vcovHC(modelo1))
+```
+
+#Função Impulso-Resposta
+```{r}
+#Ordenação: juros->Câmbio->ADM->Livres
+irf.LCam=irf(modelo1,impulse='Cam',response='Livres',n.ahead=24,cumulative=F)
+plot(irf.LCam)
+
+irf.LJuros=irf(modelo1,impulse='Juros',response='Livres',n.ahead=24)
+plot(irf.LJuros)
+
+#Alterar a ordenação
+Dados1=Dados[,c(4,3,1,2,5,6,7,8,9,10,11,12,13,14,15,16)]
+
+modelo2=VAR(Dados1[,1:4],p=2,type='const',exogen=Dados[,5:16])
+irf.LCam=irf(modelo2,impulse='Cam',response='Livres',n.ahead=24,cumulative=F)
+plot(irf.LCam)
+
+irf.LJuros=irf(modelo2,impulse='Juros',response='Livres',n.ahead=24)
+plot(irf.LJuros)
+```
+
+#Decomposição da Variância
+```{r}
+modelo.livres=fevd(modelo2,n.ahead=12)
+100*modelo.livres$Livres
+```
+

@@ -1,0 +1,167 @@
+---
+title: "Atividade 2 - Raíz Unitária"
+author: "Rodrigo Cabral"
+date: "21/04/2023"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Índice de produção da industria de transformação
+```{r}
+library(readxl)
+
+ind=read_excel('indice_industria_transf.xlsx')
+
+ind = ts(ind[,2],start=c(2002,1),freq=12)
+
+plot(ind,ylab='Índice da industria de transformação')
+acf(ind)
+
+#Primeira Diferença
+dind=diff(ind)
+plot(dind,ylab='L(1) Índice da industria de transformação')
+acf(dind)
+
+
+```
+
+
+# Teste de Raiz Unitária
+
+# Leitura dos Dados - india Industrial
+```{r}
+library(readxl)
+
+ind=read_excel('indice_industria_transf.xlsx')
+
+y = ts(ind[,2],start=c(2002,1),freq=12)
+
+plot(y,ylab='Índice da industria de transformação')
+
+```
+
+
+## Teste de RU ADF
+
+```{r}
+#install.packages('urca')
+library(urca)
+
+#modelo com tendência
+ind.df1 =ur.df(y,type='trend',lags=1, selectlags = 'BIC')
+summary(ind.df1)
+plot(ind.df1)
+
+#modelo com drift
+ind.df2=ur.df(y,type='drift',lags=1,selectlags='BIC')
+plot(ind.df2)
+summary(ind.df2)
+
+#modelo sem drift e sem tendência e com constante
+ind.df3=ur.df(y,type='none',lags=1,selectlags='BIC')
+plot(ind.df3)
+summary(ind.df3)
+
+
+```
+Aplicando o teste ADF e analisando o resultando para o modelo completo (tendência+drift+constante), apenas com constante e tendência e apenas constante, todos apresentaram valores acima do intervalo de confiança para 5%, logo, não rejeita H0 e a série possui ao menos uma raíz unitária. 
+
+
+## Teste ADF - indice Industria de transformação
+
+```{r}
+ind.df1=ur.df(y,type='trend',lags=0)
+plot(ind.df1)
+summary(ind.df1)
+
+ind.df2=ur.df(y,type='trend',lags=1)
+plot(ind.df2)
+summary(ind.df2)
+
+ind.df3=ur.df(y,type='trend',lags=12,selectlags = 'AIC')
+plot(ind.df3)
+summary(ind.df3)
+
+ind.df4=ur.df(y,type='trend',lags=12,selectlags = 'BIC')
+plot(ind.df4)
+summary(ind.df4)
+
+ind.df5=ur.df(y,type='drift',lags=12,selectlags = 'BIC')
+plot(ind.df5)
+summary(ind.df5)
+
+ind.df6=ur.df(y,type='none',lags=1,selectlags='BIC')
+plot(ind.df6)
+summary(ind.df6)
+
+#teste em relação a variação da série
+dind=diff(y)
+
+plot(dind)
+
+dind.df=ur.df(dind,type='none',lags=0)
+plot(dind.df)
+summary(dind.df)
+
+dind.df1=ur.df(dind,type='none',lags=24,selectlags='BIC')
+plot(dind.df1)
+summary(dind.df1)
+```
+Para a série diferenciada uma vez L(1), nota-se que o teste de estatística T para diferentes configurações está dentro do intervalo de confiança de 5%, assim rejeita-se a hipótese nula, logo a série diferenciada uma vez não possui raíz unitária e é estacionária.
+
+# Teste de PP
+
+```{r}
+library(urca)
+
+#modelo com tendencia
+ind.pp = ur.pp(y,type='Z-alpha',model='trend',lags='long')
+plot(ind.pp)
+summary(ind.pp)
+
+#modelo sem tendência e com constante
+ind2.pp = ur.pp(y,type='Z-alpha',model='constant',lags='long')
+plot(yind2.pp)
+summary(yind2.pp)
+
+#Modelo com tendência e constante
+ind3.pp= ur.pp(y, type='Z-tau',model='trend',lags='long')
+plot(ind3.pp)
+summary(ind3.pp)
+
+#modelo sem tendência e com constante
+ind4.pp=ur.pp(y,type='Z-tau',model='constant',lags='long')
+plot(ind4.pp)
+summary(ind4.pp)
+
+```
+
+Ao analisar a tabela de Dickey-Fuller para 250 graus de liberdade, não rejeita-se H0. Logo, a série possui ao menos uma raíz unitária. 
+
+
+# Teste KPSS
+```{r}
+#modelo com tendência
+ind.kpss=ur.kpss(y,type='tau',lags='long')
+plot(ind.kpss)
+summary(ind.kpss)
+
+#modelo sem tendência e com constante
+ind.kpss2=ur.kpss(y,type='mu',lags='long')
+plot(ind.kpss2)
+summary(ind.kpss2)
+```
+Para os dois modelos propostos o valor da estatística T é maior que o valor crítico para 5%, logo rejeita-se H0 e tem-se ao menos uma raíz unitária. 
+
+
+
+
+
+
+
+

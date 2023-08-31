@@ -1,0 +1,201 @@
+---
+title: "Atividade 2 - Raíz Unitária"
+author: "Rodrigo Cabral"
+date: "21/04/2023"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Nesta atividade foi utilizada uma série com o índice de produção da indústria de transformação brasiliera com ajuste sazonal. O período é referente a Jan/02 a Jan/23. 
+
+## Lendo a série temporal 
+```{r}
+library(readxl)
+
+ind=read_excel('indice_industria_transf.xlsx')
+
+ind = ts(ind[,2],start=c(2002,1),freq=12)
+
+plot(ind,ylab='Índice da industria de transformação')
+acf(ind)
+
+#Primeira Diferença
+dind=diff(ind)
+plot(dind,ylab='L(1) Índice da industria de transformação')
+acf(dind)
+
+
+```
+## Plotando a série original, a primeira diferença e as respectivas autocorrelações.
+
+```{r}
+plot(ind,ylab='Índice da industria de transformação')
+acf(ind)
+
+#Primeira Diferença
+dind=diff(ind)
+plot(dind,ylab='L(1) Índice da industria de transformação')
+acf(dind, ylab='ACF (diff)')
+
+
+```
+### Nota-se que a série original possui uma forte autocorrelação com decaimento aproximandamente linear. Já a série diferenciada 1 vez, nota-se a estacionaridade da série.   
+
+
+
+
+# Teste de Raiz Unitária
+## Aqui serão aplicados alguns testes de raiz unitárias. Serão eles: 
+## - Dickey Fuller
+## - Dickey Fuller Aumentado 
+## - Phillips Perron
+## - KPSS
+## - Dickey e PAntula
+
+## Vale observar que aparentemente a série não possui uma tendência explícita. Esta observação será considerada na aplicação dos testes. 
+
+# Teste de RU ADF
+## Aplicando o teste de ADF puro e depois com lag=1, critério de informação Bayesian e drift. 
+```{r}
+#install.packages('urca')
+library(urca)
+
+#Modelo com constante
+
+ind.df1 =ur.df(ind)
+summary(ind.df1)
+ind.df2 =ur.df(ind,type='drift',lags=12, selectlags = 'BIC')
+summary(ind.df2)
+
+```
+Aplicando o teste ADF e analisando o resultando para a estatística T, tem-se que não pode-se rejeitar a H0, logo a série possui pelo menos uma raíz unitária. 
+
+
+## tomando a primeira diferença e aplicando o teste ADF, tem-se:
+
+
+```{r}
+dind=diff(ind)
+plot(dind)
+
+dind.df=ur.df(dind,type='none',lags=0)
+summary(dind.df)
+
+dind.df1=ur.df(dind,type='none',lags=24,selectlags='BIC')
+summary(dind.df1)
+```
+Para a série diferenciada uma vez L(1), nota-se que o teste de estatística T está a esquerda de tau1 5%, assim rejeita-se a hipótese nula, logo a série diferenciada uma vez não possui raíz unitária e é estacionária.
+
+# Teste de PP
+## Aplicando o teste de Phillips-Perron, que corrige as estatísticas convencionais de DF a partir de Z-tau-mu, tem-se:
+```{r}
+#Série índice da industria de transformação
+#modelo com constante
+#library(urca)
+
+ind.pp = ur.pp(ind,type='Z-tau',model='constant',lags='short')
+#plot(ind.pp)
+summary(ind.pp)
+
+ind.pp = ur.pp(ind,type='Z-alpha',model='trend',lags='short')
+#plot(y.pp)
+summary(ind.pp)
+
+ind.pp = ur.pp(ind,type='Z-tau',model='constant',lags='long')
+#plot(y.pp)
+summary(ind.pp)
+
+```
+### Nota-se que pelo teste PP, a estatística Z não está dentro do intervalo de confiança menor que 5%. Assim, não rejeita-se a hipótese nula. A série possui raiz unitária e é não-estacionária. 
+
+
+
+# Teste KPSS
+## Já para o teste de KPSS, assume-se estacionariedade como hipótese nula. 
+```{r}
+ind.kpss=ur.kpss(ind,type='mu',lags='short')
+#plot(ind.kpss)
+summary(ind.kpss)
+
+ind.kpss2=ur.kpss(ind,type='tau',lags='short')
+#plot(ind.kpss2)
+summary(ind.kpss2)
+```
+Como a estatística do teste KPSS é maior que o valor crítico, rejeita-se a hipótese nula. Ou seja, a série possui raíz unitária e é não-estacionária. 
+
+
+# Teste de Dickey e Pantula
+## Utilizado para séries com maius de uma raiz unitária. 
+
+
+```{r}
+#install.packages('dynlm')
+library(dynlm)
+
+#Passo 1: Teste para 2 RU
+etapa1=dynlm(diff(log(ind),1,2)~trend(ind,scale=F)+diff(L(log(ind)),1,1))
+summary(etapa1)
+
+#acf(etapa1$residuals,type='correlation')
+#acf(etapa1$residuals,type='partial')
+
+etapa2=dynlm(diff(log(ind),1,2)~diff(L(log(ind)),1,1))
+summary(etapa2)
+
+#acf(etapa2$residuals,type='correlation')
+#acf(etapa2$residuals,type='partial')
+
+etapa3=dynlm(diff(log(ind),1,2)~diff(L(log(ind)),1,1)-1)
+summary(etapa3)
+
+#acf(etapa3$residuals,type='correlation')
+#acf(etapa3$residuals,type='partial')
+
+
+#Etapa 2: Teste para 1 RU
+etapa4=dynlm(diff(log(ind),1,2)~diff(L(log(ind)),1,1)+L(log(ind)))
+summary(etapa4)
+
+#acf(etapa4$residuals,type='correlation')
+#acf(etapa4$residuals,type='partial')
+```
+Aplicando o teste para duas raízes unitárias (que possuem significância econométrica) rejeita-se a hipótese nula. Mas para o passo dois não rejeita-se a hipótese nula. Assim, nota-se que há uma raíz unitária.
+
+
+# Teste de raiz unitária sazonal 
+## Mesmo em séries sazonalmente ajustadas em alguns casos há presença de componente sazonal. Assim, será aplicada a essa série o teste de raiz unitária sazonal.
+```{r}
+
+#install.packages('uroot')
+library(uroot)
+
+#deterministic = a vector of length three containing zeros or ones to indicate, respectively, whether a constant, a trend or seasonal dummies are included in the regression equation of the test.
+sazonal.ur=hegy.test(ind, deterministic = c(1,1,1), lag.method = "fixed", maxlag = 1)
+
+sazonal.ur=hegy.test(ind,deterministic = c(1,1,1), lag.method = "BIC", maxlag = 12)
+sazonal.ur$fitted.model
+sazonal.ur$statistics
+sazonal.ur$pvalues
+
+#Teste DHF
+#Instalando e carregando pacote de Dummies sazonais
+#install.packages("gets")
+library(gets)
+
+teste.sazonal=dynlm(diff(ind,1,4)~trend(ind,scale=F)+ season(ind) + L(ind,4)+diff(L(ind,1:4),1,12))
+summary(teste.sazonal)         
+#acf(teste.sazonal$residuals)
+#pacf(teste.sazonal$residuals)
+
+
+```
+
+Para o teste de raíz unitária sazonal, conclui-se que existe uma raíz unitária não sazonal.
+
+
+

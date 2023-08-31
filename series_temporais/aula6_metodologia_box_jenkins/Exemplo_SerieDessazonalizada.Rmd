@@ -1,0 +1,240 @@
+---
+title: "Exemplo PIB - Agropecuária - Modelo ARIMA Série Dessazonalizada"
+
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+#install.packages("forecast") #Previsão de Modelos ARIMA
+#install.packages("lmtest") #Testes de Hipóteses
+#install.packages('tseries') #Teste de Normalidade
+#install.packages('FinTS') #Teste de heterocedasticidade
+#install.packages("urca") #Teste de RU
+#install.packages("readxl") #Importar arquivos excel
+
+#Carregando pacotes
+library(forecast)
+library(lmtest)
+require(tseries)
+require(stats)
+library(FinTS)
+library(urca)
+library(readxl)
+```
+
+
+```{r}
+#leitura dos dados
+Dados=read_excel('PIB_Agropecuaria.xlsx')
+
+dados=ts(Dados[,2],start=c(1996,1),freq=4)
+plot(dados,main='PIB Agropecuária',ylab='PIB (milhões R$)',xlab='Trim/Ano',col='blue')
+grid()
+
+Acf(dados,type='correlation',lag.max = 36)
+
+monthplot(dados)
+```
+
+```{r}
+# Dessazonalização da Série
+
+modelo=decompose(dados,type='multiplicative')
+plot(modelo)
+
+y=dados/modelo$seasonal
+plot(y,main='Série dessazonalizada')
+
+Acf(y)
+
+```
+
+# Teste de RU - ADF
+
+```{r}
+pib.df1=ur.df(y,type='trend',lags=12,selectlags='BIC')
+summary(pib.df1)
+
+pib.df2=ur.df(y,type='drift',lags=12,selectlags='BIC')
+summary(pib.df2)
+
+```
+
+
+# Identificação(candidatos) do(s) Modelo(s) ARIMA(p,d,q)=> ARIMA(p,1,q)
+```{r}
+dz=diff(y)
+par(mfrow=c(1,1))
+Acf(dz,lag.max = 42)
+Acf(dz,type='partial')
+
+```
+
+
+
+## Escolha do(s) modelo(s) ARIMA(p,d,q)
+```{r}
+#Modelo 1: ARIMA(p,d,q)
+ano=2018
+trim=4
+
+p=3
+d=1
+q=4
+
+modelo1=Arima(window(y,end=c(ano,trim)),order=c(p,d,q),method='ML', include.drift = TRUE)
+modelo1
+
+p=3
+d=1
+q=2
+
+modelo2=Arima(window(y,end=c(ano,trim)),order=c(p,d,q),method='ML', include.drift = TRUE)
+modelo2
+
+```
+
+
+```{r}
+### Etapa 3 - VERIFICAÇÃO
+# Resíduos do modelo 2
+
+residuos=ts(modelo2$residuals)
+
+Acf(residuos)
+
+Box.test(residuos,lag=1,type="Ljung-Box") 
+Box.test(residuos,lag=2,type="Ljung-Box")
+Box.test(residuos,lag=3,type="Ljung-Box") 
+Box.test(residuos,lag=4,type="Ljung-Box") 
+Box.test(residuos,lag=8,type="Ljung-Box")
+
+
+tsdiag(modelo2,gof.lag = 24)
+
+#Teste de Normalidade
+par(mfrow=c(1,1))
+hist(residuos, freq=F, ylab='Densidade', xlab='Resíduos', main='Resíduos')
+par(new=TRUE)
+plot(density(residuos), axes=F,ann=F, col=4, lwd=2)  
+
+jarque.bera.test(residuos) 
+
+shapiro.test(residuos)  
+
+# Teste de Homocedasticidade
+ArchTest(residuos, lag=4)
+ArchTest(residuos, lag=8)
+ArchTest(residuos, lag=12)
+```
+
+```{r}
+#ARIMA com Transformação de Box-Cox
+p=3
+d=1
+q=2
+
+modelo3=Arima(window(y,end=c(ano,trim)),order=c(p,d,q),method='ML', include.drift = TRUE,lambda=0)
+modelo3
+```
+
+
+```{r}
+### Etapa 3 - VERIFICAÇÃO
+# Resíduos do modelo 3
+
+residuos=ts(modelo3$residuals)
+
+Acf(residuos)
+
+Box.test(residuos,lag=1,type="Ljung-Box") 
+Box.test(residuos,lag=2,type="Ljung-Box")
+Box.test(residuos,lag=3,type="Ljung-Box") 
+Box.test(residuos,lag=4,type="Ljung-Box") 
+Box.test(residuos,lag=8,type="Ljung-Box")
+
+
+tsdiag(modelo3,gof.lag = 24)
+
+#Teste de Normalidade
+par(mfrow=c(1,1))
+hist(residuos, freq=F, ylab='Densidade', xlab='Resíduos', main='Resíduos')
+par(new=TRUE)
+plot(density(residuos), axes=F,ann=F, col=4, lwd=2)  
+
+jarque.bera.test(residuos) 
+
+shapiro.test(residuos)  
+
+# Teste de Homocedasticidade
+ArchTest(residuos, lag=4)
+ArchTest(residuos, lag=8)
+ArchTest(residuos, lag=12)
+
+checkresiduals(modelo3)
+```
+
+
+# Validação/Previsão
+```{r}
+plot(y,ylab="PIB")
+lines(modelo3$fit,col='red')
+grid()
+
+accuracy(modelo3)
+
+```
+
+
+# Previsão um passo à frente
+```{r}
+ano1=2019
+trim1=1
+pib.model3 <- Arima(window(y,start=c(ano1,trim1)),model=modelo3, biasadj=T)
+pib.model3
+pib.model3$fit
+
+min.pib=min(y,pib.model3$fit)
+max.pib=max(y,pib.model3$fit)
+
+plot(y,ylab="PIB",ylim=c(min.pib,max.pib))
+lines(pib.model3$fit,col='red')
+
+accuracy(pib.model3)
+
+```
+
+# Cálculo do erro de Previsão vários passos à frente
+```{r}
+passos=16
+prev=forecast(modelo3,h=passos,level=c(0.95), biasadj=T)
+prev
+plot(prev)
+
+min.pib=min(y,prev$lower)
+max.pib=max(y,prev$upper)
+plot(forecast(modelo3,h=passos,level=c(0.95), biasadj=T), ylab="PIB",ylim=c(min.pib,max.pib))
+lines(y)
+lines(modelo3$fit,col='blue')
+lines(pib.model3$fit,col='red')
+
+accuracy(forecast(modelo3,h=passos,biasadj=T),window(y,start=ano1))
+```
+
+#Previsão vários passos a frente Futuro
+```{r}
+H=9
+modelo.final <- Arima(y,order=c(p,d,q),method='ML',lambda=0,include.drift = T)
+modelo.final
+
+previsao<-forecast(modelo.final,h=H,level=c(0.95,0.90),biasadj=T)
+previsao
+plot(previsao)
+
+```
+

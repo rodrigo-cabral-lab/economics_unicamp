@@ -1,0 +1,166 @@
+---
+title: "Testes RU"
+author: "R Ballini"
+date: "20/04/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Taxa de Câmbio
+```{r}
+library(readxl)
+
+cambio=read_excel('Cambio.xlsx')
+
+cambio = ts(cambio[,2],start=c(2000,1),freq=12)
+
+plot(cambio,ylab='Taxa de Câmbio')
+acf(cambio)
+
+#Primeira Diferença
+dcambio=diff(cambio)
+plot(dcambio)
+acf(dcambio)
+
+
+```
+
+
+# Teste de Raiz Unitária
+
+# Leitura dos Dados - IPCA
+```{r}
+library(readxl)
+
+ipca=read_excel('IPCA.xlsx')
+
+y = ts(ipca[,2],start=c(1998,1),freq=12)
+
+plot(y,ylab='IPCA')
+
+```
+
+
+## Teste de RU ADF
+
+```{r}
+#install.packages('urca')
+library(urca)
+
+#Modelo com constante
+
+ipca.df1 =ur.df(y,type='drift',lags=0)
+summary(ipca.df1)
+
+plot(ipca.df1)
+
+```
+
+
+## Teste ADF - Câmbio
+
+
+```{r}
+cam.df1=ur.df(cambio,type='trend',lags=0)
+plot(cam.df1)
+
+cam.df2=ur.df(cambio,type='trend',lags=1)
+plot(cam.df2)
+summary(cam.df2)
+
+cam.df2=ur.df(cambio,type='trend',lags=12,selectlags = 'AIC')
+plot(cam.df2)
+summary(cam.df2)
+
+cam.df2=ur.df(cambio,type='trend',lags=12,selectlags = 'BIC')
+plot(cam.df2)
+summary(cam.df2)
+
+cam.df3=ur.df(cambio,type='drift',lags=12,selectlags = 'BIC')
+plot(cam.df3)
+summary(cam.df3)
+
+cam.df4=ur.df(cambio,type='none',lags=12,selectlags='BIC')
+plot(cam.df4)
+summary(cam.df4)
+
+#teste em relação a variação do câmbio
+dcambio=diff(cambio)
+
+plot(dcambio)
+
+dcam.df=ur.df(dcambio,type='none',lags=0)
+plot(dcam.df)
+summary(dcam.df)
+
+dcam.df1=ur.df(dcambio,type='none',lags=24,selectlags='BIC')
+plot(dcam.df1)
+summary(dcam.df1)
+```
+
+
+# Teste de PP
+
+```{r}
+#Série IPCA
+#modelo com constante
+library(urca)
+
+ipca.pp = ur.pp(y,type='Z-tau',model='constant',lags='short')
+plot(ipca.pp)
+summary(ipca.pp)
+
+y.pp = ur.pp(y,type='Z-alpha',model='constant',lags='short')
+plot(y.pp)
+summary(y.pp)
+
+```
+
+```{r}
+#Modelo com constante e tendência
+
+cambio.pp1= ur.pp(cambio, type='Z-tau',model='trend',lags='short')
+plot(cambio.pp1)
+summary(cambio.pp1)
+
+cambio.pp2=ur.pp(cambio,type='Z-tau',model='constant',lags='short')
+summary(cambio.pp2)
+```
+
+
+
+# Teste KPSS
+
+```{r}
+#IPCA
+ipca.kpss=ur.kpss(y,type='mu',lags='short')
+plot(ipca.kpss)
+
+summary(ipca.kpss)
+```
+
+
+```{r}
+#Câmbio
+
+cambio.kpss1=ur.kpss(cambio,type='tau',lags='long')
+plot(cambio.kpss1)
+summary(cambio.kpss1)
+
+cambio.kpss2=ur.kpss(cambio,type='mu',lags='long')
+plot(cambio.kpss2)
+summary(cambio.kpss2)
+```
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,164 @@
+---
+title: "Atividade 2 - Raíz Unitária"
+author: "Rodrigo Cabral"
+date: "21/04/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Consumo de energia 
+```{r}
+library(readxl)
+
+energ=read_excel('energia_industrial.xlsx')
+
+energ = ts(energ[,2],start=c(1979,1),freq=12)
+
+plot(energ,ylab='Consumo de energia industrial (GWh)')
+acf(energ)
+
+#Primeira Diferença
+denerg=diff(energ)
+
+
+```
+
+
+# Teste de Raiz Unitária
+
+# Leitura dos Dados - Energia Industrial
+```{r}
+library(readxl)
+
+energ=read_excel('energia_industrial.xlsx')
+
+y = ts(energ[,2],start=c(1979,1),freq=12)
+
+plot(y,ylab='Consumo de energia industrial (GWh)')
+
+```
+
+
+## Teste de RU ADF
+
+```{r}
+#install.packages('urca')
+library(urca)
+
+#Modelo com constante
+
+energ.df1 =ur.df(y,type='drift',lags=0)
+summary(energ.df1)
+
+plot(energ.df1)
+
+```
+
+
+## Teste ADF - Energia Industrial
+
+
+```{r}
+energ.df1=ur.df(y,type='trend',lags=0)
+plot(energ.df1)
+
+energ.df2=ur.df(y,type='trend',lags=1)
+plot(energ.df2)
+summary(energ.df2)
+
+energ.df2=ur.df(y,type='trend',lags=12,selectlags = 'AIC')
+plot(energ.df2)
+summary(energ.df2)
+
+energ.df2=ur.df(y,type='trend',lags=12,selectlags = 'BIC')
+plot(energ.df2)
+summary(energ.df2)
+
+energ.df3=ur.df(y,type='drift',lags=12,selectlags = 'BIC')
+plot(energ.df3)
+summary(energ.df3)
+
+energ.df4=ur.df(y,type='none',lags=12,selectlags='BIC')
+plot(energ.df4)
+summary(energ.df4)
+
+#teste em relação a variação do câmbio
+denerg=diff(y)
+
+plot(denerg)
+
+denerg.df=ur.df(denerg,type='none',lags=0)
+plot(denerg.df)
+summary(denerg.df)
+
+denerg.df1=ur.df(denerg,type='none',lags=24,selectlags='BIC')
+plot(denerg.df1)
+summary(denerg.df1)
+```
+
+
+# Teste de PP
+
+```{r}
+#Série IPCA
+#modelo com constante
+library(urca)
+
+energ.pp = ur.pp(y,type='Z-tau',model='constant',lags='short')
+plot(energ.pp)
+summary(energ.pp)
+
+y.pp = ur.pp(y,type='Z-alpha',model='constant',lags='short')
+plot(y.pp)
+summary(y.pp)
+
+```
+
+```{r}
+#Modelo com constante e tendência
+
+energ.pp1= ur.pp(y, type='Z-tau',model='trend',lags='short')
+plot(energ.pp1)
+summary(energ.pp1)
+
+energ.pp2=ur.pp(y,type='Z-tau',model='constant',lags='short')
+summary(energ.pp2)
+```
+
+
+
+# Teste KPSS
+
+```{r}
+#Energia Industrial
+energ.kpss=ur.kpss(y,type='mu',lags='short')
+plot(energ.kpss)
+
+summary(energ.kpss)
+```
+
+
+```{r}
+#Energia Industrial
+
+energ.kpss1=ur.kpss(y,type='tau',lags='long')
+plot(energ.kpss1)
+summary(energ.kpss1)
+
+energ.kpss2=ur.kpss(y,type='mu',lags='long')
+plot(energ.kpss2)
+summary(energ.kpss2)
+```
+
+
+
+
+
+
+
+
+
+

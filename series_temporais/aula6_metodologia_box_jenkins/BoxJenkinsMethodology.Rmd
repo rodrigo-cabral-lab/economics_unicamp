@@ -1,0 +1,174 @@
+---
+title: "Aplicação - BJ"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#Aplicação - PIB-Agropecuária
+
+#install.packages("forecast") #Previsão de Modelos ARIMA
+#install.packages("lmtest") #Testes de Hipóteses
+#install.packages('tseries') #Teste de Normalidade
+#install.packages('FinTS') #Teste de heterocedasticidade
+#install.packages("urca") #Teste de RU
+#install.packages("TTR") #Média Móvel Simples
+#install.packages("readxl") #Importar arquivos excel
+
+#Carregando pacotes
+library(forecast)
+library(lmtest)
+require(tseries)
+require(stats)
+library(FinTS)
+library(urca)
+library(readxl)
+
+```
+
+```{r}
+#leitura dos dados
+#PIB Agropecuária - Brasil
+Dados=read_excel('PIB_Agropecuaria.xlsx')
+
+pib_agro=ts(Dados[,2],start=c(1996,1),freq=4)
+plot(pib_agro,main='PIB Agropecuária Brasil (R$ (milhões))',ylab='PIB',xlab='Trim/Ano',col='blue')
+grid()
+
+monthplot(pib_agro)
+
+Acf(diff(pib_agro,lag=4),type='correlation')
+Acf(diff(pib_agro,lag=4),type='partial')
+
+auto.arima(pib_agro)
+#ARIMA(0,1,2)(0,1,1)[4]
+
+ano=2018
+trim=4
+ajuste=Arima(window(pib_agro,end=c(ano,trim)), order = c(0, 1, 2),
+     seasonal = list(order = c(0, 1, 1), period = 4),
+     method = c("ML"))
+ajuste
+
+#Critérios de Informação
+AIC(ajuste)
+BIC(ajuste)
+```
+
+
+
+```{r}
+### Etapa VERIFICAÇÃO
+
+# Análise da FAC 
+
+Acf(ajuste$residuals,type='correlation')
+
+```
+
+
+```{r}
+#Analise das autocorrelações e teste de Autocorrelação de Ljung-Box
+
+#Gráfico dos resíduos, autocorrelação e p-valor de Ljung-Box
+#ARIMA(1,1,1)
+tsdiag(ajuste,gof.lag = 16)
+
+#Valor da estatística do teste p=q=1 => fitdf=p+q=2
+Box.test(ajuste$residuals,lag= 12, type='Ljung-Box',fitdf = 2)
+
+
+```
+
+
+```{r}
+
+#Normalidade dos resíduos
+par(mfrow=c(1,1))
+hist(ajuste$residuals, freq=F, ylab='Densidade', xlab='Resíduos', main='Resíduos')
+par(new=TRUE)
+plot(density(ajuste$residuals), axes=F,ann=F, col=4, lwd=2)  
+
+
+jarque.bera.test(ajuste$residuals) # Teste Jarque-Bera
+shapiro.test(ajuste$residuals)   # Teste Shapiro-Wilk
+
+```
+
+
+```{r}
+#Teste de Heterocedasticidade
+
+ArchTest(ajuste$residuals, lag=4) # Teste ARCH - Teste p/ heteroc. condicional
+ArchTest(ajuste$residuals, lag=8)
+ArchTest(ajuste$residuals, lag=12)
+
+
+```
+
+```{r}
+checkresiduals(ajuste)
+```
+
+# Validação/Previsão
+```{r}
+plot(pib_agro,ylab="PIB")
+lines(ajuste$fit,col='red')
+grid()
+
+accuracy(ajuste)
+
+```
+
+# Previsão um passo a frente e erros de previsão
+
+```{r}
+ano1=2019
+trim1=1
+pib.model2 <- Arima(window(pib_agro,start=c(ano1,trim1)),model=ajuste, biasadj=T)
+pib.model2$fit
+min.pib2=min(pib_agro,pib.model2$fit)
+max.pib2=max(pib_agro,pib.model2$fit)
+
+plot(pib_agro,ylab="PIB",ylim=c(min.pib2,max.pib2))
+lines(pib.model2$fit,col='red')
+
+accuracy(pib.model2)
+
+```
+
+
+```{r}
+# Cálculo do erro de Previsão vários passos à frente
+passos=16
+prev=forecast(ajuste,h=passos,level=c(0.95), biasadj=T)
+prev
+plot(prev)
+
+min.pib=min(pib_agro,prev$lower)
+max.pib=max(pib_agro,prev$upper)
+plot(forecast(ajuste,h=passos,level=c(0.95), biasadj=T), ylab="PIB",ylim=c(min.pib,max.pib))
+lines(pib_agro)
+lines(ajuste$fit,col='blue')
+lines(pib.model2$fit,col='red')
+
+accuracy(forecast(ajuste,h=passos,biasadj=T),window(pib_agro,start=ano1))
+
+```
+
+#Previsão vários passos a frente Futuro
+```{r}
+H=12
+modelo.final <- Arima(pib_agro, order = c(0, 1, 2),
+     seasonal = list(order = c(0, 1, 1), period = 4),
+     method = c("ML"))
+modelo.final
+previsao<-forecast(modelo.final,h=H,level=c(0.95,0.90),biasadj=T)
+previsao
+plot(previsao)
+
+```
+

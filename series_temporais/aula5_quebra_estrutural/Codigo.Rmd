@@ -1,0 +1,119 @@
+---
+title: "Quebra Estrutural"
+author: "R Ballini"
+date: "11/04/2023"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(readxl)
+
+cambio=read_excel('Cambio.xlsx')
+
+cambio=ts(cambio[,2],start=c(1999,7),freq=12)
+View(cambio)
+plot(cambio)
+```
+
+# Testes Chow (1960) e CUMSUM
+
+```{r}
+#install.packages('strucchange')
+library(strucchange)
+
+fs.cambio=Fstats(diff(cambio)~1)
+plot(fs.cambio)
+sctest(fs.cambio)
+## visualize the breakpoint implied by the argmax of the F statistics
+plot(cambio)
+lines(breakpoints(fs.cambio))
+breakpoints(fs.cambio)
+
+#efp=empirical fluctuation process
+ocus.cambio=efp(diff(cambio)~1,type='Rec-CUSUM')
+plot(ocus.cambio)
+sctest(ocus.cambio)
+```
+
+# Teste de Bai & Perron (1998)
+
+```{r}
+bp.cambio=breakpoints(cambio~1,h=0.15,breaks=5)
+summary(bp.cambio)
+plot(bp.cambio)
+coef(bp.cambio,breaks=4)
+```
+
+
+# Teste de Perron - quebra é exógena (é conhecida)
+
+```{r}
+#teste de Chow indicou a quebra em 2017(9), ou seja na observação 218
+
+N=length(cambio)
+
+DP=rep(0,N)
+DL=rep(0,N)
+DS=rep(0,N)
+
+Tb=218
+
+for (t in 1:N){
+  if(t==Tb+1)
+    DP[t]=1
+  
+  if(t>Tb){
+    DL[t]=1
+    DS[t]=t-Tb
+  }
+}
+DP=ts(DP)
+DL=ts(DL)
+
+DS=ts(DS)
+
+trend=ts(seq(1:N))
+modeloA = lm(cambio ~trend +DL)
+summary(modeloA)
+
+resA=modeloA$residuals
+
+library(urca)
+
+res.df=ur.df(resA,type='none',selectlags='BIC')
+summary(res.df)
+
+lambda=Tb/N
+lambda
+```
+
+# Teste de Zivot-Andrews
+```{r}
+library(urca)
+cambio.za=ur.za(cambio,model='intercept',lag=1)
+summary(cambio.za)
+plot(cambio.za)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

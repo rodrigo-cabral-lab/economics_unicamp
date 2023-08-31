@@ -1,0 +1,34 @@
+---
+title: "Decomposição de Série Temporal"
+author: "Rodrigo Cabral"
+date: "12/03/2023
+output:
+  word_document:
+    toc: yes
+  html_document:
+    toc: yes
+    
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# exercicio - industry (2002-2023) 
+
+```{r}
+library(readxl)
+
+dados= read_excel('industry_index.xlsx')
+View(dados)
+```
+
+```{r}
+#lendo arquivos e declarando variaveis
+ind = ts(dados[,3], start=c(2002,1), freq=12)
+plot(ind,ylab='Manufacturing',xlab='Meses')
+
+lind=ts(log(dados[,3]), start=c(2002,1), freq=12)
+plot(lind,ylab='log(Manufacturing)',xlab='Anos')
+
+```
