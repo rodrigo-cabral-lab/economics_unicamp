@@ -1,0 +1,3 @@
+F statistic (ANOVA)
+hypothesis test
+non-nested model

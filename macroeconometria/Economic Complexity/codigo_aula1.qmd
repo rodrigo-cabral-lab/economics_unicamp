@@ -1,0 +1,127 @@
+---
+title: "Economic Complexity and Income Inequality"
+format: html
+editor: visual
+---
+
+```{r}
+#install.packages('readxl')
+#install.packages('GGally')
+
+library(readxl)
+library(GGally)
+```
+
+```{r}
+Dados <- read_excel("BaseDados.xlsx", 
+    sheet = "DataBase")
+
+lgdp=log(Dados[,4]/Dados[,7])
+
+
+Dados1=cbind(Dados[,1:3],lgdp,Dados[,5:7])
+Dados1=data.frame(Dados1)
+colnames(Dados1)=c('País','id','Ano','lgdp','ICE','Gini','Pop')
+
+```
+
+# Análise Descritiva
+
+```{r}
+summary(Dados1[,4:7])
+```
+
+# Análise Bivariada
+
+```{r}
+#Análise Gráfica
+ggpairs(Dados1,columns=4:6,columnLabels = c('ln(GDPpc)','ICE','GINI'),upper = list(continuous = "cor"),diag = list(continuous ='barDiag'),lower = list(continuous= "points"))
+
+```
+
+```{r}
+model.gini=lm(Gini~ICE, data=Dados1)
+summary(model.gini)
+
+model.lgdp=lm(Gini~lgdp,data=Dados1)
+summary(model.lgdp)
+```
+
+## Clarke Test (teste para modelos não aninhados)
+
+```{r}
+#install.packages('clarkeTest')
+library(clarkeTest)
+clarke_test(model.gini, model.lgdp)
+```
+
+# Modelo Painel
+
+```{r}
+#install.packages('plm')
+#install.packages('kableExtra')
+#install.packages('dplyr')
+#install.packages('xtable')
+
+library(plm)
+library(kableExtra)
+library(dplyr)
+library(xtable)
+
+nlspd <- pdata.frame(Dados1, index=c("id", "Ano"))
+smpl <- nlspd[nlspd$id %in% c(1,2),c(1:2, 4:7)]
+tbl <- xtable(smpl) 
+
+tbl %>%
+   kbl(align = "c",digits=4,caption='Dados') %>%
+  kable_classic(full_width = F) %>%
+  kable_styling(bootstrap_options='striped',position = "center")
+
+pdim(nlspd)
+
+```
+
+## The Pooled Model (modelo agrupado)
+
+```{r}
+gini.pooled_1 <- plm(Gini~ ICE+ lgdp+I(lgdp^2)+I(log(Pop)), model="pooling", data=nlspd)
+summary(gini.pooled_1)
+#install.packages('broom')
+library(broom)
+kable(tidy(gini.pooled_1), digits=3, caption="Pooled model")
+
+#install.packages('lmtest')
+library(lmtest)
+tbl <- tidy(coeftest(gini.pooled_1, vcov=vcovHC(gini.pooled_1,
+                    type="HC0",cluster="group")))
+kable(tbl, digits=5, caption="Pooled 'Gini' model with cluster robust standard errors")
+
+```
+
+## The Fixed Effects Model
+
+```{r}
+gini.fixed <- lm(Gini~ICE+lgdp+I(lgdp^2)+I(log(Pop))+factor(id)-1,
+                  data=nlspd)
+kable(tidy(gini.fixed), digits=3, 
+      caption="Fixed effects ")
+
+tbl <- tidy(coeftest(gini.fixed, vcov=vcovHC(gini.fixed,
+                    type="HC0",cluster="group")))
+kable(tbl, digits=5, caption="Fixed effects model with cluster robust standard errors")
+```
+
+```{r}
+gini.within <- plm(Gini~ICE+lgdp+I(lgdp^2)+I(log(Pop)),
+                  data=nlspd, 
+                  model="within")
+tbl <- tidy(gini.within)
+kable(tbl, digits=5, caption=
+  "Fixed effects using the 'within' model option ")
+```
+
+```{r}
+
+kable(tidy(pFtest(gini.within, gini.pooled_1)), caption=
+        "Fixed effects test: Ho:'No fixed effects'")
+```

@@ -1,1 +1,1 @@
-# economics_unicamp
+### This repository has activities related to the stricto sensu postgraduate disciplines of the Economics course at Unicamp.
